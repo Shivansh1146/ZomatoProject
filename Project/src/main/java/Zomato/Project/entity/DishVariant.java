@@ -22,4 +22,5 @@ public class DishVariant extends Base {
     @ManyToOne
     @JoinColumn(name = "dish_id")
     private Dish dish;
+
 }
