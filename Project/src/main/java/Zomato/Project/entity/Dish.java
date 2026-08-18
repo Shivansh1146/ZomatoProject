@@ -16,12 +16,21 @@ import java.util.List;
 @Entity(name = "dish")
 @SoftDelete
 public class Dish extends Base {
+
+    @Column(name = "name", nullable = false)
     private String dishName;
+
+    @Column(name = "description", nullable = false)
     private String dishDescription;
+
+    @Column(name = "type", nullable = false)
     private DishType dishType;
+
+    @Column(name = "rating", nullable = false)
     private Double dishRating;
 
     @OneToMany(mappedBy = "dish", cascade = CascadeType.ALL)
+//    @JoinColumn(name = "variant_list", nullable = false)
     private List<DishVariant> dishVariantList;
 
     @ManyToOne

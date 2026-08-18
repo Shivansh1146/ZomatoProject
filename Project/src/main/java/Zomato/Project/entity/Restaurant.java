@@ -15,13 +15,16 @@ import java.util.List;
 @SoftDelete
 public class Restaurant extends Base {
 
+    @Column(name = "name", nullable = false)
     private String restaurantName;
+
+    @Column(name = "phone_number", nullable = false, unique = true)
     private String restaurantPhoneNumber;
 
-    @OneToOne
-    @JoinColumn(name = "address_id")
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "address_id",nullable = false)
     private Address restaurantAddress;
 
-    @OneToMany(mappedBy = "restaurant",cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL)
     private List<Dish> dishList;
 }
