@@ -26,6 +26,6 @@ public class User extends Base {
     @CreationTimestamp
     private LocalDateTime userAccountCreatedTime;
 
-    @OneToMany(mappedBy = "User", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Address> userAddressList;
 }
