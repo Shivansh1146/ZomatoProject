@@ -22,6 +22,7 @@ public class RestaurantService {
         }
         Restaurant restaurant = convertRestaurantDTOToEntity(restaurantRequestDTO);
         restaurantRepository.save(restaurant);
+        return "Successful is added your restaurant";
     }
 
     private Restaurant convertRestaurantDTOToEntity(RestaurantRequestDTO restaurantRequestDTO) {
