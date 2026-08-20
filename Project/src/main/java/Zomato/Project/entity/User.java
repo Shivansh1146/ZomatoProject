@@ -27,6 +27,9 @@ public class User extends Base {
     @Column(name = "phone_number", nullable = false, unique = true, length = 10)
     private String userPhoneNumber;
 
+    @Column(name = "verified", nullable = false)
+    private Boolean otpVerified;
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Address> userAddressList;
 }

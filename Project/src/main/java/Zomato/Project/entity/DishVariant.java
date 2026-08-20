@@ -25,6 +25,12 @@ public class DishVariant extends Base {
     @Column(name = "available", nullable = false)
     private Boolean dishVariantAvailable;
 
+    @Column(nullable = false)
+    private boolean inventoryManaged;
+
+    @Column(nullable = false)
+    private long currentAvailableInventoryCount;
+
     @ManyToOne
     @JoinColumn(name = "dish_id")
     private Dish dish;
