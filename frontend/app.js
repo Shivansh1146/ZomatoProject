@@ -306,6 +306,7 @@ function addVariant() {
         <label for="v${idx}-inv">Available Inventory Count</label>
         <input type="number" id="v${idx}-inv" placeholder="e.g. 50" min="0" autocomplete="off" />
         <span class="field-hint">Cannot be negative</span>
+        <span class="field-error" id="verr-${idx}-inv"></span>
       </div>
     </div>
   `;
@@ -360,14 +361,6 @@ function validateVariants() {
     const priceEl  = document.getElementById(`v${idx}-price`);
     const invEl    = document.getElementById(`v${idx}-inv`);
     let invErr     = document.getElementById(`verr-${idx}-inv`);
-    
-    // Create inventory error span if it doesn't exist yet
-    if (!invErr && invEl) {
-       invErr = document.createElement('span');
-       invErr.className = 'field-error';
-       invErr.id = `verr-${idx}-inv`;
-       invEl.parentNode.appendChild(invErr);
-    }
 
     // Clear previous
     if (nameErr)  nameErr.textContent  = '';
