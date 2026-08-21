@@ -288,19 +288,19 @@ function addVariant() {
       </div>
       <div class="form-group">
         <label>Available <span class="req">*</span></label>
-        <span class="toggle-label">
+        <label class="toggle-label">
           <input type="checkbox" id="v${idx}-available" checked />
           <span class="toggle-track"></span>
           <span id="v${idx}-available-text">Yes</span>
-        </span>
+        </label>
       </div>
       <div class="form-group">
         <label>Manage Inventory <span class="req">*</span></label>
-        <span class="toggle-label">
+        <label class="toggle-label">
           <input type="checkbox" id="v${idx}-managed" />
           <span class="toggle-track"></span>
           <span id="v${idx}-managed-text">No</span>
-        </span>
+        </label>
       </div>
       <div class="form-group col-full" id="v${idx}-inv-group" style="display:none;">
         <label for="v${idx}-inv">Available Inventory Count</label>
