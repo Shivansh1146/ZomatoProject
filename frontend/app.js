@@ -268,6 +268,7 @@ function addVariant() {
   const card = document.createElement('div');
   card.className = 'variant-card';
   card.id        = `variant-${idx}`;
+  // Note: name, price, available, inventoryManaged are all @NotNull/@NotBlank in backend
   card.innerHTML = `
     <div class="variant-header">
       <span class="variant-title">Variant #${idx}</span>
@@ -275,42 +276,48 @@ function addVariant() {
     </div>
     <div class="variant-grid">
       <div class="form-group">
-        <label for="v${idx}-name">Variant Name</label>
+        <label for="v${idx}-name">Variant Name <span class="req">*</span></label>
         <input type="text" id="v${idx}-name" placeholder="e.g. Large" autocomplete="off" />
+        <span class="field-error" id="verr-${idx}-name"></span>
       </div>
       <div class="form-group">
-        <label for="v${idx}-price">Price (₹)</label>
-        <input type="number" id="v${idx}-price" placeholder="e.g. 199" min="0" step="0.01" autocomplete="off" />
+        <label for="v${idx}-price">Price (₹) <span class="req">*</span></label>
+        <input type="number" id="v${idx}-price" placeholder="e.g. 199" min="0.01" step="0.01" autocomplete="off" />
+        <span class="field-hint">Must be greater than 0</span>
+        <span class="field-error" id="verr-${idx}-price"></span>
       </div>
       <div class="form-group">
-        <label>
-          <span class="toggle-label">
-            <input type="checkbox" id="v${idx}-available" checked />
-            <span class="toggle-track"></span>
-            Available
-          </span>
-        </label>
+        <label>Available <span class="req">*</span></label>
+        <span class="toggle-label">
+          <input type="checkbox" id="v${idx}-available" checked />
+          <span class="toggle-track"></span>
+          <span id="v${idx}-available-text">Yes</span>
+        </span>
       </div>
       <div class="form-group">
-        <label>
-          <span class="toggle-label">
-            <input type="checkbox" id="v${idx}-managed" />
-            <span class="toggle-track"></span>
-            Manage Inventory
-          </span>
-        </label>
+        <label>Manage Inventory <span class="req">*</span></label>
+        <span class="toggle-label">
+          <input type="checkbox" id="v${idx}-managed" />
+          <span class="toggle-track"></span>
+          <span id="v${idx}-managed-text">No</span>
+        </span>
       </div>
       <div class="form-group col-full" id="v${idx}-inv-group" style="display:none;">
         <label for="v${idx}-inv">Available Inventory Count</label>
         <input type="number" id="v${idx}-inv" placeholder="e.g. 50" min="0" autocomplete="off" />
+        <span class="field-hint">Cannot be negative</span>
       </div>
     </div>
   `;
 
   container.appendChild(card);
 
-  // Show inventory count field only when inventory managed is checked
+  // Toggle text labels and inventory field
+  document.getElementById(`v${idx}-available`).addEventListener('change', function() {
+    document.getElementById(`v${idx}-available-text`).textContent = this.checked ? 'Yes' : 'No';
+  });
   document.getElementById(`v${idx}-managed`).addEventListener('change', function() {
+    document.getElementById(`v${idx}-managed-text`).textContent = this.checked ? 'Yes' : 'No';
     document.getElementById(`v${idx}-inv-group`).style.display = this.checked ? 'flex' : 'none';
   });
 }
@@ -323,16 +330,51 @@ function removeVariant(idx) {
 function collectVariants() {
   const variants = [];
   document.querySelectorAll('.variant-card').forEach(card => {
-    const idx = card.id.replace('variant-', '');
+    const idx           = card.id.replace('variant-', '');
+    const invManaged    = document.getElementById(`v${idx}-managed`)?.checked ?? false;
+    const invRaw        = document.getElementById(`v${idx}-inv`)?.value;
     variants.push({
-      menuVariantName:                 document.getElementById(`v${idx}-name`)?.value.trim()  || null,
-      menuVariantPrice:                parseFloat(document.getElementById(`v${idx}-price`)?.value) || null,
-      menuVariantAvailable:            document.getElementById(`v${idx}-available`)?.checked ?? true,
-      inventoryManaged:                document.getElementById(`v${idx}-managed`)?.checked   ?? false,
-      currentAvailableInventoryCount:  parseInt(document.getElementById(`v${idx}-inv`)?.value)  || null,
+      menuVariantName:                document.getElementById(`v${idx}-name`)?.value.trim() || null,
+      menuVariantPrice:               parseFloat(document.getElementById(`v${idx}-price`)?.value) || null,
+      menuVariantAvailable:           document.getElementById(`v${idx}-available`)?.checked ?? true,
+      inventoryManaged:               invManaged,
+      currentAvailableInventoryCount: invManaged && invRaw !== '' ? parseInt(invRaw) : null,
     });
   });
   return variants;
+}
+
+/* Validate all variant cards — backend requires name, price (>0), available, inventoryManaged */
+function validateVariants() {
+  let valid = true;
+  document.querySelectorAll('.variant-card').forEach(card => {
+    const idx   = card.id.replace('variant-', '');
+    const name  = document.getElementById(`v${idx}-name`)?.value.trim();
+    const price = document.getElementById(`v${idx}-price`)?.value;
+
+    const nameErr  = document.getElementById(`verr-${idx}-name`);
+    const priceErr = document.getElementById(`verr-${idx}-price`);
+    const nameEl   = document.getElementById(`v${idx}-name`);
+    const priceEl  = document.getElementById(`v${idx}-price`);
+
+    // Clear previous
+    if (nameErr)  nameErr.textContent  = '';
+    if (priceErr) priceErr.textContent = '';
+    if (nameEl)   nameEl.classList.remove('invalid');
+    if (priceEl)  priceEl.classList.remove('invalid');
+
+    if (!name) {
+      if (nameEl)  nameEl.classList.add('invalid');
+      if (nameErr) nameErr.textContent = 'Variant name is required';
+      valid = false;
+    }
+    if (!price || isNaN(price) || +price <= 0) {
+      if (priceEl)  priceEl.classList.add('invalid');
+      if (priceErr) priceErr.textContent = 'Price must be greater than 0';
+      valid = false;
+    }
+  });
+  return valid;
 }
 
 /* ────────────────────────────────────────
@@ -354,22 +396,21 @@ function validateMenuItem() {
   const description  = document.getElementById('m-description').value.trim();
   const restaurantId = document.getElementById('m-restaurant-id').value.trim();
 
+  // menuItemName — @NotBlank only (no @Pattern in updated backend)
   if (!name) {
     setError('m-name', 'err-m-name', 'Item name is required'); valid = false;
-  } else if (!/^[a-zA-Z ]+$/.test(name)) {
-    setError('m-name', 'err-m-name', 'Letters and spaces only'); valid = false;
   }
 
+  // menuItemLabel — still has @Pattern
   if (!label) {
     setError('m-label', 'err-m-label', 'Label is required'); valid = false;
   } else if (!/^[a-zA-Z ]+$/.test(label)) {
     setError('m-label', 'err-m-label', 'Letters and spaces only'); valid = false;
   }
 
+  // menuItemDescription — @NotBlank only (no @Pattern in updated backend)
   if (!description) {
     setError('m-description', 'err-m-description', 'Description is required'); valid = false;
-  } else if (!/^[a-zA-Z ]+$/.test(description)) {
-    setError('m-description', 'err-m-description', 'Letters and spaces only'); valid = false;
   }
 
   if (!restaurantId) {
@@ -383,23 +424,28 @@ function validateMenuItem() {
 
 document.getElementById('form-menuitem').addEventListener('submit', async (e) => {
   e.preventDefault();
-  if (!validateMenuItem()) return;
+
+  // Validate both main form and all variant cards
+  const mainValid    = validateMenuItem();
+  const variantsValid = validateVariants();
+  if (!mainValid || !variantsValid) return;
 
   setLoading('btn-menuitem-submit', 'spinner-menuitem', true);
 
   const variants = collectVariants();
 
   const payload = {
-    menuItemName:              document.getElementById('m-name').value.trim(),
-    menuItemDescription:       document.getElementById('m-description').value.trim(),
-    menuItemType:              document.getElementById('m-type').value,
-    menuItemLabel:             document.getElementById('m-label').value.trim(),
-    restaurantId:              parseInt(document.getElementById('m-restaurant-id').value),
+    menuItemName:                  document.getElementById('m-name').value.trim(),
+    menuItemDescription:           document.getElementById('m-description').value.trim(),
+    menuItemType:                  document.getElementById('m-type').value,
+    menuItemLabel:                 document.getElementById('m-label').value.trim(),
+    restaurantId:                  parseInt(document.getElementById('m-restaurant-id').value),
+    // Backend iterates over this list — send null only if no variants added
     menuItemVariantRequestDTOList: variants.length > 0 ? variants : null,
   };
 
   try {
-    const res = await fetch(`${BASE_URL}/menuitem`, {
+    const res  = await fetch(`${BASE_URL}/menuitem`, {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
       body:    JSON.stringify(payload),
@@ -407,9 +453,14 @@ document.getElementById('form-menuitem').addEventListener('submit', async (e) =>
 
     const text = await res.text();
 
-    if (res.status === 201 || res.ok) {
-      showToast('success', 'Menu Item Added!', text || 'Menu item created successfully.');
+    // Backend returns 201 on success with exact message "Successfully your Menu item is added"
+    // Returns 400 Bad Request for: "Restaurant ID does not exist" | "already menu item exist"
+    if (res.status === 201) {
+      showToast('success', 'Menu Item Added! 🍕', text || 'Menu item created successfully.');
       resetMenuItemForm();
+    } else if (res.status === 400) {
+      // Business-logic errors returned as plain text from service
+      showToast('error', 'Could Not Add Item', text || 'Check the details and try again.');
     } else {
       showToast('error', `Error ${res.status}`, text || 'Something went wrong. Check your backend.');
     }
