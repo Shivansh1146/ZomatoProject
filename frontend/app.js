@@ -388,10 +388,16 @@ function validateVariants() {
       valid = false;
     }
     
-    if (invManaged && (invCount === '' || invCount === null)) {
-      if (invEl)  invEl.classList.add('invalid');
-      if (invErr) invErr.textContent = 'Inventory count required if managed';
-      valid = false;
+    if (invManaged) {
+      if (invCount === '' || invCount === null) {
+        if (invEl)  invEl.classList.add('invalid');
+        if (invErr) invErr.textContent = 'Inventory count required if managed';
+        valid = false;
+      } else if (+invCount < 0) {
+        if (invEl)  invEl.classList.add('invalid');
+        if (invErr) invErr.textContent = 'Cannot be negative';
+        valid = false;
+      }
     }
   });
   return valid;
