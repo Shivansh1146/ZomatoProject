@@ -37,13 +37,13 @@ public class Address extends Base {
     @Column(nullable = false)
     private Double longitude;
 
-    @Column(name = "type", nullable = false)
+    @Column(name = "type")
     private String addressType;
 
-    @Column(nullable = false)
+
     private Boolean defaultAddress;
 
     @ManyToOne
-    @JoinColumn(name = "user_id",nullable = false)
+    @JoinColumn(name = "user_id")
     private User user;
 }

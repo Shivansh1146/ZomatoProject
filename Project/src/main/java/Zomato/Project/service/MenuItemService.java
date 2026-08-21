@@ -32,6 +32,13 @@ public class MenuItemService {
             return "already menu item exist";
 
         }
+        for (MenuItemVariantRequestDTO menuItemVariantRequestDTOList : menuItemRequestDTO.getMenuItemVariantRequestDTOList()) {
+
+            if (Boolean.TRUE.equals(menuItemVariantRequestDTOList.getInventoryManaged()) && menuItemVariantRequestDTOList.getCurrentAvailableInventoryCount() == null) {
+                return "inventory count is required when inventory is  managed ";
+            }
+        }
+
 
         MenuItem menuItem = convertDTOToEntity(menuItemRequestDTO, restaurant);
         menuItemRepository.save(menuItem);
@@ -59,7 +66,11 @@ public class MenuItemService {
             menuItemVariant.setMenuVariantPrice(menuItemVariantRequestDTO.getMenuVariantPrice());
             menuItemVariant.setMenuVariantAvailable(menuItemVariantRequestDTO.getMenuVariantAvailable());
             menuItemVariant.setInventoryManaged(menuItemVariantRequestDTO.getInventoryManaged());
-            menuItemVariant.setCurrentAvailableInventoryCount(menuItemVariantRequestDTO.getCurrentAvailableInventoryCount());
+            if (Boolean.TRUE.equals(menuItemVariantRequestDTO.getInventoryManaged())) {
+                menuItemVariant.setCurrentAvailableInventoryCount(menuItemVariantRequestDTO.getCurrentAvailableInventoryCount());
+            } else {
+                menuItemVariant.setCurrentAvailableInventoryCount(0L);
+            }
             menuItemVariant.setMenuItem(menuItem);
 
             menuItemVariantList.add(menuItemVariant);

@@ -28,7 +28,7 @@ public class MenuItemVariant extends Base {
     @Column(nullable = false)
     private Boolean inventoryManaged;
 
-    @Column(nullable = false)
+
     private Long currentAvailableInventoryCount;
 
     @ManyToOne

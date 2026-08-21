@@ -26,7 +26,7 @@ public class MenuItem extends Base {
     @Column(name = "type", nullable = false)
     private MenuItemType menuItemType;
 
-    @Column(name = "rating", nullable = false)
+    @Column(name = "rating")
     private Double menuItemRating;
 
     @Column(name = "label", nullable = false)
