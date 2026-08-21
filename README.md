@@ -39,8 +39,9 @@
 - 🍕 **Menu Item Management** — Add menu items with variants, ratings, and types (VEG/NON-VEG)
 - 🧹 **Soft Delete** — Records are soft-deleted (not permanently removed) using Hibernate's `@SoftDelete`
 - 🕒 **Audit Timestamps** — Automatic creation timestamps on all entities via `@CreationTimestamp`
-- ✅ **Request Validation** — Full input validation using `spring-boot-starter-validation`
+- ✅ **Request Validation** — Full input validation using `spring-boot-starter-validation` (mirrored in frontend)
 - 🏛️ **Layered Architecture** — Clean separation between Controller → Service → Repository → Entity layers
+- 🎨 **Admin Panel Frontend** — Includes a stunning, fully-responsive dark-theme frontend to easily add restaurants and manage complex menu items.
 
 ---
 
@@ -172,12 +173,19 @@ spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQL8Dialect
 ./mvnw clean install
 ```
 
-**5. Run the application**
+**5. Run the backend application**
 ```bash
 ./mvnw spring-boot:run
 ```
+The server starts at: **`http://localhost:9090`**
 
-The server starts at: **`http://localhost:8080`**
+**6. Run the Admin Panel Frontend**
+Open a new terminal window in the `frontend` folder and start a local HTTP server:
+```bash
+cd ZomatoProject/frontend
+python -m http.server 3000
+```
+Then open your browser to **`http://localhost:3000`** to access the Admin Panel.
 
 ---
 
@@ -185,7 +193,7 @@ The server starts at: **`http://localhost:8080`**
 
 | Property                        | Default                               | Description                   |
 |---------------------------------|---------------------------------------|-------------------------------|
-| `server.port`                   | `8080`                                | Application port              |
+| `server.port`                   | `9090`                                | Application port              |
 | `spring.datasource.url`         | `jdbc:mysql://localhost:3306/zomato_db` | Database URL                |
 | `spring.jpa.hibernate.ddl-auto` | `update`                              | Schema strategy               |
 | `spring.jpa.show-sql`           | `true`                                | Print SQL to console          |
@@ -223,6 +231,10 @@ ZomatoProject/
     │       └── resources/
     │           └── application.properties
     └── pom.xml
+frontend/
+└── index.html      # Admin Panel HTML
+└── style.css       # Custom UI styling
+└── app.js          # Logic & API integration
 ```
 
 ---
