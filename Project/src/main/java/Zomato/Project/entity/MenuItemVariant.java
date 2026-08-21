@@ -12,18 +12,18 @@ import org.hibernate.annotations.SoftDelete;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity(name = "dish_variant")
+@Entity(name = "menu_variant")
 @SoftDelete
-public class DishVariant extends Base {
+public class MenuVariant extends Base {
 
     @Column(name = "name", nullable = false)
-    private String dishVariantName;
+    private String menuVariantName;
 
     @Column(name = "price", nullable = false)
-    private Double dishVariantPrice;
+    private Double menuVariantPrice;
 
     @Column(name = "available", nullable = false)
-    private Boolean dishVariantAvailable;
+    private Boolean menuVariantAvailable;
 
     @Column(nullable = false)
     private boolean inventoryManaged;
@@ -32,7 +32,7 @@ public class DishVariant extends Base {
     private long currentAvailableInventoryCount;
 
     @ManyToOne
-    @JoinColumn(name = "dish_id")
-    private Dish dish;
+    @JoinColumn(name = "menu_item_id")
+    private MenuItem menuItem;
 
 }
