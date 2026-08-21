@@ -232,12 +232,17 @@ document.getElementById('form-restaurant').addEventListener('submit', async (e) 
     });
 
     const text = await res.text();
+    let errorMsg = text;
+    try {
+      const json = JSON.parse(text);
+      if (json.message || json.error) errorMsg = json.message || json.error;
+    } catch (e) {}
 
     if (res.status === 201 || res.ok) {
       showToast('success', 'Restaurant Added!', text || 'Restaurant registered successfully.');
       resetForm('form-restaurant');
     } else {
-      showToast('error', `Error ${res.status}`, text || 'Something went wrong. Check your backend.');
+      showToast('error', `Error ${res.status}`, errorMsg || 'Something went wrong. Check your backend.');
     }
   } catch (err) {
     showToast('error', 'Connection Failed', `Cannot reach backend at ${BASE_URL}. Is Spring Boot running?`);
@@ -459,8 +464,8 @@ document.getElementById('form-menuitem').addEventListener('submit', async (e) =>
     menuItemType:                  document.getElementById('m-type').value,
     menuItemLabel:                 document.getElementById('m-label').value.trim(),
     restaurantId:                  parseInt(document.getElementById('m-restaurant-id').value),
-    // Backend iterates over this list — send empty array [] instead of null to prevent NPE
-    menuItemVariantRequestDTOList: variants,
+    // Backend iterates over this list — send null only if no variants added
+    menuItemVariantRequestDTOList: variants.length > 0 ? variants : null,
   };
 
   try {
@@ -471,17 +476,17 @@ document.getElementById('form-menuitem').addEventListener('submit', async (e) =>
     });
 
     const text = await res.text();
+    let errorMsg = text;
+    try {
+      const json = JSON.parse(text);
+      if (json.message || json.error) errorMsg = json.message || json.error;
+    } catch (e) {}
 
-    // Backend returns 201 on success with exact message "Successfully your Menu item is added"
-    // Returns 400 Bad Request for: "Restaurant ID does not exist" | "already menu item exist"
     if (res.status === 201) {
       showToast('success', 'Menu Item Added! 🍕', text || 'Menu item created successfully.');
       resetMenuItemForm();
-    } else if (res.status === 400) {
-      // Business-logic errors returned as plain text from service
-      showToast('error', 'Could Not Add Item', text || 'Check the details and try again.');
     } else {
-      showToast('error', `Error ${res.status}`, text || 'Something went wrong. Check your backend.');
+      showToast('error', `Backend Error ${res.status}`, errorMsg || 'Something went wrong on the server.');
     }
   } catch (err) {
     showToast('error', 'Connection Failed', `Cannot reach backend at ${BASE_URL}. Is Spring Boot running?`);
