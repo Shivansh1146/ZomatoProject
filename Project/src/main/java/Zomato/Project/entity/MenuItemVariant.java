@@ -14,7 +14,7 @@ import org.hibernate.annotations.SoftDelete;
 @NoArgsConstructor
 @Entity(name = "menu_variant")
 @SoftDelete
-public class MenuVariant extends Base {
+public class MenuItemVariant extends Base {
 
     @Column(name = "name", nullable = false)
     private String menuVariantName;
@@ -26,10 +26,10 @@ public class MenuVariant extends Base {
     private Boolean menuVariantAvailable;
 
     @Column(nullable = false)
-    private boolean inventoryManaged;
+    private Boolean inventoryManaged;
 
     @Column(nullable = false)
-    private long currentAvailableInventoryCount;
+    private Long currentAvailableInventoryCount;
 
     @ManyToOne
     @JoinColumn(name = "menu_item_id")

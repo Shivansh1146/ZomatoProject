@@ -26,5 +26,5 @@ public class Restaurant extends Base {
     private Address restaurantAddress;
 
     @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL)
-    private List<Dish> dishList;
+    private List<MenuItem> menuItemList;
 }

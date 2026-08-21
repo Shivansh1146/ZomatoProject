@@ -1,6 +1,6 @@
 package Zomato.Project.entity;
 
-import Zomato.Project.enums.DishType;
+import Zomato.Project.enums.MenuItemType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -13,25 +13,28 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity(name = "dish")
+@Entity(name = "menu_item")
 @SoftDelete
-public class Dish extends Base {
+public class MenuItem extends Base {
 
     @Column(name = "name", nullable = false)
-    private String dishName;
+    private String menuItemName;
 
     @Column(name = "description", nullable = false)
-    private String dishDescription;
+    private String menuItemDescription;
 
     @Column(name = "type", nullable = false)
-    private DishType dishType;
+    private MenuItemType menuItemType;
 
     @Column(name = "rating", nullable = false)
-    private Double dishRating;
+    private Double menuItemRating;
 
-    @OneToMany(mappedBy = "dish", cascade = CascadeType.ALL)
+    @Column(name = "label", nullable = false)
+    private String menuItemLabel;
+
+    @OneToMany(mappedBy = "menuItem", cascade = CascadeType.ALL)
 //    @JoinColumn(name = "variant_list", nullable = false)
-    private List<DishVariant> dishVariantList;
+    private List<MenuItemVariant> menuItemVariantList;
 
     @ManyToOne
     @JoinColumn(name = "restaurant_id")

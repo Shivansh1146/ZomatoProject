@@ -1,4 +1,4 @@
 package Zomato.Project.enums;
-public enum MenuType {
+public enum MenuItemType {
     VEG, NONVEG
 }
