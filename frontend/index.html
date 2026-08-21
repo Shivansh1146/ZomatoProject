@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Zomato Admin Panel</title>
+  <meta name="description" content="Admin dashboard to manage restaurants and menu items for the Zomato backend." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <span class="logo-icon">🍽️</span>
+      <span class="logo-text">Zomato<span class="logo-accent">Admin</span></span>
+    </div>
+    <nav class="sidebar-nav">
+      <button class="nav-item active" id="nav-restaurant" onclick="showPage('restaurant')">
+        <span class="nav-icon">🏪</span>
+        <span>Add Restaurant</span>
+      </button>
+      <button class="nav-item" id="nav-menuitem" onclick="showPage('menuitem')">
+        <span class="nav-icon">🍕</span>
+        <span>Add Menu Item</span>
+      </button>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="api-status" id="api-status">
+        <span class="status-dot"></span>
+        <span id="api-status-text">Checking API…</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main-content">
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="menu-toggle" id="menu-toggle" onclick="toggleSidebar()" aria-label="Toggle sidebar">☰</button>
+        <div class="breadcrumb" id="breadcrumb">
+          <span>Dashboard</span>
+          <span class="bc-sep">›</span>
+          <span id="bc-current">Add Restaurant</span>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <span class="topbar-tag">Backend: <code>localhost:8080</code></span>
+      </div>
+    </header>
+
+    <!-- PAGE: ADD RESTAURANT -->
+    <section class="page active" id="page-restaurant">
+      <div class="page-header">
+        <h1 class="page-title">🏪 Add Restaurant</h1>
+        <p class="page-subtitle">Register a new restaurant — maps to <code>POST /restaurant</code></p>
+      </div>
+
+      <div class="card form-card">
+        <form id="form-restaurant" novalidate>
+
+          <div class="form-section-label">Basic Info</div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="r-name">Restaurant Name <span class="req">*</span></label>
+              <input type="text" id="r-name" placeholder="e.g. Pizza Palace" autocomplete="off" />
+              <span class="field-hint">Letters and spaces only</span>
+              <span class="field-error" id="err-r-name"></span>
+            </div>
+            <div class="form-group">
+              <label for="r-phone">Phone Number <span class="req">*</span></label>
+              <input type="text" id="r-phone" placeholder="e.g. 9876543210" maxlength="10" autocomplete="off" />
+              <span class="field-hint">10-digit Indian mobile (starts with 6–9)</span>
+              <span class="field-error" id="err-r-phone"></span>
+            </div>
+          </div>
+
+          <div class="form-section-label">Address</div>
+          <div class="form-grid">
+            <div class="form-group col-full">
+              <label for="r-street1">Street Line 1 <span class="req">*</span></label>
+              <input type="text" id="r-street1" placeholder="e.g. 123, MG Road" autocomplete="off" />
+              <span class="field-error" id="err-r-street1"></span>
+            </div>
+            <div class="form-group col-full">
+              <label for="r-street2">Street Line 2 <span class="optional">(optional)</span></label>
+              <input type="text" id="r-street2" placeholder="e.g. Near City Mall" autocomplete="off" />
+            </div>
+            <div class="form-group">
+              <label for="r-pincode">Pin Code <span class="req">*</span></label>
+              <input type="text" id="r-pincode" placeholder="e.g. 110001" maxlength="6" autocomplete="off" />
+              <span class="field-hint">6-digit, cannot start with 0</span>
+              <span class="field-error" id="err-r-pincode"></span>
+            </div>
+            <div class="form-group">
+              <label for="r-state">State <span class="req">*</span></label>
+              <input type="text" id="r-state" placeholder="e.g. Maharashtra" autocomplete="off" />
+              <span class="field-error" id="err-r-state"></span>
+            </div>
+            <div class="form-group">
+              <label for="r-country">Country <span class="req">*</span></label>
+              <input type="text" id="r-country" placeholder="e.g. India" autocomplete="off" />
+              <span class="field-error" id="err-r-country"></span>
+            </div>
+          </div>
+
+          <div class="form-section-label">Geo Coordinates</div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="r-lat">Latitude <span class="req">*</span></label>
+              <input type="number" id="r-lat" placeholder="e.g. 19.076090" step="any" autocomplete="off" />
+              <span class="field-hint">Between -90 and 90</span>
+              <span class="field-error" id="err-r-lat"></span>
+            </div>
+            <div class="form-group">
+              <label for="r-lng">Longitude <span class="req">*</span></label>
+              <input type="number" id="r-lng" placeholder="e.g. 72.877426" step="any" autocomplete="off" />
+              <span class="field-hint">Between -180 and 180</span>
+              <span class="field-error" id="err-r-lng"></span>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button type="button" class="btn-secondary" onclick="resetForm('form-restaurant')">Reset</button>
+            <button type="submit" class="btn-primary" id="btn-restaurant-submit">
+              <span class="btn-label">Add Restaurant</span>
+              <span class="btn-spinner hidden" id="spinner-restaurant"></span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- PAGE: ADD MENU ITEM -->
+    <section class="page" id="page-menuitem">
+      <div class="page-header">
+        <h1 class="page-title">🍕 Add Menu Item</h1>
+        <p class="page-subtitle">Add a new dish to a restaurant — maps to <code>POST /menuitem</code></p>
+      </div>
+
+      <div class="card form-card">
+        <form id="form-menuitem" novalidate>
+
+          <div class="form-section-label">Item Details</div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="m-name">Item Name <span class="req">*</span></label>
+              <input type="text" id="m-name" placeholder="e.g. Paneer Tikka" autocomplete="off" />
+              <span class="field-hint">Letters and spaces only</span>
+              <span class="field-error" id="err-m-name"></span>
+            </div>
+            <div class="form-group">
+              <label for="m-label">Label <span class="req">*</span></label>
+              <input type="text" id="m-label" placeholder="e.g. Bestseller" autocomplete="off" />
+              <span class="field-hint">Letters and spaces only</span>
+              <span class="field-error" id="err-m-label"></span>
+            </div>
+            <div class="form-group col-full">
+              <label for="m-description">Description <span class="req">*</span></label>
+              <input type="text" id="m-description" placeholder="e.g. Spicy grilled cottage cheese" autocomplete="off" />
+              <span class="field-hint">Letters and spaces only</span>
+              <span class="field-error" id="err-m-description"></span>
+            </div>
+            <div class="form-group">
+              <label for="m-type">Item Type <span class="req">*</span></label>
+              <div class="type-toggle">
+                <button type="button" class="type-btn active" id="type-veg" onclick="selectType('VEG')">
+                  <span class="veg-dot"></span> VEG
+                </button>
+                <button type="button" class="type-btn" id="type-nonveg" onclick="selectType('NONVEG')">
+                  <span class="nonveg-dot"></span> NON-VEG
+                </button>
+              </div>
+              <input type="hidden" id="m-type" value="VEG" />
+              <span class="field-error" id="err-m-type"></span>
+            </div>
+            <div class="form-group">
+              <label for="m-restaurant-id">Restaurant ID <span class="req">*</span></label>
+              <input type="number" id="m-restaurant-id" placeholder="e.g. 1" min="1" autocomplete="off" />
+              <span class="field-hint">ID of the restaurant this item belongs to</span>
+              <span class="field-error" id="err-m-restaurant-id"></span>
+            </div>
+          </div>
+
+          <!-- VARIANTS SECTION -->
+          <div class="form-section-label">
+            Item Variants
+            <button type="button" class="btn-add-variant" id="btn-add-variant" onclick="addVariant()">+ Add Variant</button>
+          </div>
+          <div id="variants-container">
+            <!-- variants injected by JS -->
+          </div>
+          <p class="variants-hint">Variants are optional (e.g. Small, Medium, Large)</p>
+
+          <div class="form-actions">
+            <button type="button" class="btn-secondary" onclick="resetMenuItemForm()">Reset</button>
+            <button type="submit" class="btn-primary" id="btn-menuitem-submit">
+              <span class="btn-label">Add Menu Item</span>
+              <span class="btn-spinner hidden" id="spinner-menuitem"></span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- TOAST NOTIFICATION -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
