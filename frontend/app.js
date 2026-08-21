@@ -459,8 +459,8 @@ document.getElementById('form-menuitem').addEventListener('submit', async (e) =>
     menuItemType:                  document.getElementById('m-type').value,
     menuItemLabel:                 document.getElementById('m-label').value.trim(),
     restaurantId:                  parseInt(document.getElementById('m-restaurant-id').value),
-    // Backend iterates over this list — send null only if no variants added
-    menuItemVariantRequestDTOList: variants.length > 0 ? variants : null,
+    // Backend iterates over this list — send empty array [] instead of null to prevent NPE
+    menuItemVariantRequestDTOList: variants,
   };
 
   try {
