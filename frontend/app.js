@@ -351,17 +351,31 @@ function validateVariants() {
     const idx   = card.id.replace('variant-', '');
     const name  = document.getElementById(`v${idx}-name`)?.value.trim();
     const price = document.getElementById(`v${idx}-price`)?.value;
+    const invManaged = document.getElementById(`v${idx}-managed`)?.checked;
+    const invCount   = document.getElementById(`v${idx}-inv`)?.value;
 
     const nameErr  = document.getElementById(`verr-${idx}-name`);
     const priceErr = document.getElementById(`verr-${idx}-price`);
     const nameEl   = document.getElementById(`v${idx}-name`);
     const priceEl  = document.getElementById(`v${idx}-price`);
+    const invEl    = document.getElementById(`v${idx}-inv`);
+    let invErr     = document.getElementById(`verr-${idx}-inv`);
+    
+    // Create inventory error span if it doesn't exist yet
+    if (!invErr && invEl) {
+       invErr = document.createElement('span');
+       invErr.className = 'field-error';
+       invErr.id = `verr-${idx}-inv`;
+       invEl.parentNode.appendChild(invErr);
+    }
 
     // Clear previous
     if (nameErr)  nameErr.textContent  = '';
     if (priceErr) priceErr.textContent = '';
+    if (invErr)   invErr.textContent   = '';
     if (nameEl)   nameEl.classList.remove('invalid');
     if (priceEl)  priceEl.classList.remove('invalid');
+    if (invEl)    invEl.classList.remove('invalid');
 
     if (!name) {
       if (nameEl)  nameEl.classList.add('invalid');
@@ -371,6 +385,12 @@ function validateVariants() {
     if (!price || isNaN(price) || +price <= 0) {
       if (priceEl)  priceEl.classList.add('invalid');
       if (priceErr) priceErr.textContent = 'Price must be greater than 0';
+      valid = false;
+    }
+    
+    if (invManaged && (invCount === '' || invCount === null)) {
+      if (invEl)  invEl.classList.add('invalid');
+      if (invErr) invErr.textContent = 'Inventory count required if managed';
       valid = false;
     }
   });
