@@ -15,7 +15,7 @@ function showPage(page) {
   document.getElementById(`page-${page}`).classList.add('active');
   document.getElementById(`nav-${page}`).classList.add('active');
 
-  const labels = { restaurant: 'Add Restaurant', menuitem: 'Add Menu Item' };
+  const labels = { restaurant: 'Add Restaurant', viewrestaurant: 'View Restaurant', menuitem: 'Add Menu Item' };
   document.getElementById('bc-current').textContent = labels[page];
 }
 
@@ -512,3 +512,96 @@ document.addEventListener('blur', (e) => {
   if (id.startsWith('r-')) validateRestaurant();
   if (id.startsWith('m-') && !id.startsWith('m-type')) validateMenuItem();
 }, true);
+
+/* ────────────────────────────────────────
+   VIEW RESTAURANT — FETCH & RENDER
+   ──────────────────────────────────────── */
+let currentViewRestaurantId = null;
+
+document.getElementById('form-search-restaurant').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const idInput = document.getElementById('search-r-id');
+  const id = idInput.value.trim();
+  
+  if (!id) return;
+
+  setLoading('btn-search-restaurant', 'spinner-search', true);
+  document.getElementById('restaurant-details-card').classList.add('hidden');
+
+  try {
+    const res = await fetch(`${BASE_URL}/restaurant/${id}`);
+    
+    if (res.ok) {
+      const data = await res.json();
+      renderRestaurantDetails(data);
+      currentViewRestaurantId = id;
+    } else if (res.status === 404) {
+      showToast('error', 'Not Found', 'Restaurant not found with this ID.');
+    } else {
+      showToast('error', `Error ${res.status}`, 'Failed to fetch restaurant details.');
+    }
+  } catch (err) {
+    showToast('error', 'Connection Failed', `Cannot reach backend at ${BASE_URL}.`);
+  } finally {
+    setLoading('btn-search-restaurant', 'spinner-search', false);
+  }
+});
+
+function renderRestaurantDetails(data) {
+  document.getElementById('display-r-name').textContent = data.restaurantName;
+  document.getElementById('display-r-phone').textContent = `+91 ${data.restaurantPhoneNumber}`;
+  
+  const address = [data.streetLine1, data.streetLine2, data.pinCode, data.state, data.country]
+    .filter(p => p)
+    .join(', ');
+  document.getElementById('display-r-location').textContent = address;
+
+  const menuItems = data.menuItemResponseDTOList || [];
+  document.getElementById('display-m-count').textContent = menuItems.length;
+
+  const listContainer = document.getElementById('display-m-list');
+  listContainer.innerHTML = '';
+
+  if (menuItems.length === 0) {
+    listContainer.innerHTML = `<div style="font-size: 0.85rem; color: var(--text-dim); font-style: italic;">No menu items found.</div>`;
+  } else {
+    menuItems.forEach(item => {
+      const variants = item.menuItemVariantResponseDTOList || [];
+      const variantHtml = variants.map(v => 
+        `<span style="display: inline-block; background: var(--bg-base); padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; color: var(--text-muted); margin-right: 6px; margin-top: 6px; border: 1px solid var(--border);">
+          ${v.menuVariantName} (₹${v.menuVariantPrice}) - ${v.menuVariantAvailable ? 'Available' : 'Unavailable'}
+        </span>`
+      ).join('');
+
+      const typeDot = item.menuItemType === 'VEG' 
+        ? `<span class="veg-dot" style="display: inline-block;"></span>` 
+        : `<span class="nonveg-dot" style="display: inline-block;"></span>`;
+
+      const itemCard = document.createElement('div');
+      itemCard.style.cssText = 'border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px; background: var(--bg-hover);';
+      itemCard.innerHTML = `
+        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+          <div>
+            <div style="font-weight: 600; font-size: 0.9rem; display: flex; align-items: center; gap: 8px;">
+              ${typeDot} ${item.menuItemName} 
+              <span style="font-size: 0.65rem; background: var(--brand-light); color: var(--brand); padding: 2px 6px; border-radius: 4px; font-weight: 700; text-transform: uppercase;">${item.menuItemLabel}</span>
+            </div>
+            <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">${item.menuItemDescription}</div>
+          </div>
+        </div>
+        <div>${variantHtml}</div>
+      `;
+      listContainer.appendChild(itemCard);
+    });
+  }
+
+  document.getElementById('restaurant-details-card').classList.remove('hidden');
+}
+
+function navigateToAddMenuItem() {
+  if (currentViewRestaurantId) {
+    document.getElementById('m-restaurant-id').value = currentViewRestaurantId;
+  }
+  showPage('menuitem');
+}
+

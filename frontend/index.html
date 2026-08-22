@@ -32,6 +32,12 @@
         </span>
         <span>Add Restaurant</span>
       </button>
+      <button class="nav-item" id="nav-viewrestaurant" onclick="showPage('viewrestaurant')">
+        <span class="nav-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        </span>
+        <span>View Restaurant</span>
+      </button>
       <button class="nav-item" id="nav-menuitem" onclick="showPage('menuitem')">
         <span class="nav-icon">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z"/><path d="M12 6v6l4 2"/></svg>
@@ -214,6 +220,111 @@
             </div>
           </div>
 
+        </div>
+      </div>
+    </section>
+
+    <!-- PAGE: VIEW RESTAURANT -->
+    <section class="page" id="page-viewrestaurant">
+      <!-- Food Banner Hero -->
+      <div class="food-hero">
+        <img src="food-banner.png" alt="Food" class="food-hero-img" />
+        <div class="food-hero-overlay">
+          <div class="food-hero-content">
+            <span class="hero-badge">🔍 View Dashboard</span>
+            <h2 class="hero-title">View Restaurant Details</h2>
+            <p class="hero-desc">Search for a restaurant by ID to view its details and add menu items.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="page-header">
+        <div class="page-title-row">
+          <div>
+            <h1 class="page-title">Restaurant Details</h1>
+            <p class="page-subtitle">Fetch restaurant and menu data</p>
+          </div>
+          <div class="endpoint-badge">
+            <span class="method-badge" style="background: var(--green);">GET</span>
+            <code>/restaurant/{id}</code>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-wrapper">
+        <div class="form-layout">
+          <!-- LEFT COLUMN -->
+          <div class="form-main">
+            
+            <!-- Search Card -->
+            <div class="card" style="margin-bottom: 24px;">
+              <div class="card-header" style="margin-bottom: 16px; padding-bottom: 0; border-bottom: none;">
+                <h2 class="card-title">Search Restaurant</h2>
+              </div>
+              <form id="form-search-restaurant" novalidate style="display: flex; gap: 12px; align-items: flex-end;">
+                <div class="form-group" style="flex: 1;">
+                  <label for="search-r-id">Restaurant ID</label>
+                  <input type="number" id="search-r-id" placeholder="e.g. 1" min="1" required autocomplete="off" />
+                </div>
+                <button type="submit" class="btn-primary" id="btn-search-restaurant">
+                  <span class="btn-label">Search</span>
+                  <span class="btn-spinner hidden" id="spinner-search"></span>
+                </button>
+              </form>
+            </div>
+
+            <!-- Details Card (Hidden initially) -->
+            <div class="card hidden" id="restaurant-details-card">
+              <div class="card-header">
+                <div class="card-icon card-icon--blue">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                </div>
+                <h2 class="card-title" id="display-r-name">Restaurant Name</h2>
+              </div>
+              
+              <div class="details-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px;">
+                <div>
+                  <div class="details-label" style="font-size: 0.75rem; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">Phone</div>
+                  <div class="details-value" id="display-r-phone" style="font-weight: 500;">-</div>
+                </div>
+                <div>
+                  <div class="details-label" style="font-size: 0.75rem; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">Location</div>
+                  <div class="details-value" id="display-r-location" style="font-weight: 500;">-</div>
+                </div>
+              </div>
+
+              <div class="section-divider">
+                <span>Menu Items (<span id="display-m-count">0</span>)</span>
+              </div>
+              
+              <div id="display-m-list" style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px;">
+                <!-- Menu items injected here -->
+              </div>
+
+              <div class="form-actions" style="justify-content: flex-start; border-top: none; padding-top: 0; margin-top: 0;">
+                <button type="button" class="btn-primary" onclick="navigateToAddMenuItem()">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                  Add New Menu Item
+                </button>
+              </div>
+            </div>
+
+          </div>
+          
+          <!-- RIGHT SIDEBAR CARD -->
+          <div class="form-aside">
+            <div class="card tips-card">
+              <h3 class="tips-title">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                Quick Tips
+              </h3>
+              <ul class="tips-list">
+                <li>Search by the unique Restaurant ID generated by the backend.</li>
+                <li>View existing menu items and variants for the restaurant.</li>
+                <li>Quickly jump to add a new menu item for this specific restaurant.</li>
+              </ul>
+            </div>
+          </div>
         </div>
       </div>
     </section>
