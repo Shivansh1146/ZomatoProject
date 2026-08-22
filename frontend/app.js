@@ -17,6 +17,10 @@ function showPage(page) {
 
   const labels = { restaurant: 'Add Restaurant', viewrestaurant: 'View Restaurant', menuitem: 'Add Menu Item' };
   document.getElementById('bc-current').textContent = labels[page];
+
+  if (page === 'viewrestaurant') {
+    fetchAllRestaurants();
+  }
 }
 
 function toggleSidebar() {
@@ -602,6 +606,52 @@ function navigateToAddMenuItem() {
   if (currentViewRestaurantId) {
     document.getElementById('m-restaurant-id').value = currentViewRestaurantId;
   }
+
+async function fetchAllRestaurants() {
+  const tbody = document.getElementById('restaurants-tbody');
+  tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 20px;"><span class="btn-spinner" style="display:inline-block; border-color: var(--brand) transparent var(--brand) transparent;"></span> Loading...</td></tr>`;
+  
+  try {
+    const res = await fetch(`${BASE_URL}/restaurant`);
+    if (res.ok) {
+      const data = await res.json();
+      renderAllRestaurantsTable(data);
+    } else {
+      tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 20px; color: var(--red);">Endpoint GET /restaurant not found or failed (HTTP ${res.status}). You must implement this in Spring Boot!</td></tr>`;
+    }
+  } catch (err) {
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 20px; color: var(--red);">Connection Failed. Is the backend running with GET /restaurant active?</td></tr>`;
+  }
+}
+
+function renderAllRestaurantsTable(restaurants) {
+  const tbody = document.getElementById('restaurants-tbody');
+  if (!Array.isArray(restaurants) || restaurants.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 20px; color: var(--text-muted);">No restaurants found.</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = restaurants.map(r => `
+    <tr style="border-bottom: 1px solid var(--border); transition: background 0.2s;" onmouseover="this.style.background='var(--bg-hover)'" onmouseout="this.style.background='transparent'">
+      <td style="padding: 12px 8px; font-weight: 500;">#${r.restaurantId}</td>
+      <td style="padding: 12px 8px; font-weight: 600; color: var(--text-base);">${r.restaurantName}</td>
+      <td style="padding: 12px 8px; color: var(--text-muted);">+91 ${r.restaurantPhoneNumber}</td>
+      <td style="padding: 12px 8px; color: var(--text-muted);">${r.state || '-'}, ${r.country || '-'}</td>
+      <td style="padding: 12px 8px; text-align: right;">
+        <button type="button" class="btn-secondary" onclick="viewRestaurantFromTable(${r.restaurantId})" style="padding: 4px 8px; font-size: 0.75rem;">
+          View Details
+        </button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function viewRestaurantFromTable(id) {
+  document.getElementById('search-r-id').value = id;
+  // Trigger form submit
+  document.getElementById('form-search-restaurant').dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+}
+
   showPage('menuitem');
 }
 

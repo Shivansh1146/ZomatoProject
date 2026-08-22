@@ -256,7 +256,7 @@
           <!-- LEFT COLUMN -->
           <div class="form-main">
             
-            <!-- Search Card -->
+            <!-- Search Card (Unchanged) -->
             <div class="card" style="margin-bottom: 24px;">
               <div class="card-header" style="margin-bottom: 16px; padding-bottom: 0; border-bottom: none;">
                 <h2 class="card-title">Search Restaurant</h2>
@@ -271,6 +271,40 @@
                   <span class="btn-spinner hidden" id="spinner-search"></span>
                 </button>
               </form>
+            </div>
+
+            <!-- ALL RESTAURANTS TABLE CARD -->
+            <div class="card" id="all-restaurants-card" style="margin-bottom: 24px;">
+              <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                  <div class="card-icon card-icon--red">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+                  </div>
+                  <h2 class="card-title">All Restaurants</h2>
+                </div>
+                <button type="button" class="btn-secondary" onclick="fetchAllRestaurants()" style="padding: 6px 12px; font-size: 0.75rem;">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+                  Refresh
+                </button>
+              </div>
+              
+              <div style="overflow-x: auto;">
+                <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.85rem;">
+                  <thead>
+                    <tr style="border-bottom: 2px solid var(--border); color: var(--text-dim); text-transform: uppercase; font-size: 0.7rem;">
+                      <th style="padding: 12px 8px;">ID</th>
+                      <th style="padding: 12px 8px;">Restaurant Name</th>
+                      <th style="padding: 12px 8px;">Phone</th>
+                      <th style="padding: 12px 8px;">City/State</th>
+                      <th style="padding: 12px 8px; text-align: right;">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody id="restaurants-tbody">
+                    <!-- Data injected here -->
+                    <tr><td colspan="5" style="text-align: center; padding: 20px; color: var(--text-muted);">Click Refresh to load restaurants (Requires GET /restaurant in backend)</td></tr>
+                  </tbody>
+                </table>
+              </div>
             </div>
 
             <!-- Details Card (Hidden initially) -->
