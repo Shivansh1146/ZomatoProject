@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Zomato Admin Panel</title>
-  <meta name="description" content="Admin dashboard to manage restaurants and menu items for the Zomato backend." />
+  <title>Zomato Partner Panel</title>
+  <meta name="description" content="Zomato Partner Admin Panel — Manage restaurants and menu items." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
@@ -15,23 +15,41 @@
   <!-- SIDEBAR -->
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-logo">
-      <span class="logo-icon">🍽️</span>
-      <span class="logo-text">Zomato<span class="logo-accent">Admin</span></span>
+      <div class="logo-mark">
+        <svg width="28" height="28" viewBox="0 0 32 32" fill="none">
+          <circle cx="16" cy="16" r="16" fill="#E23744"/>
+          <text x="50%" y="55%" dominant-baseline="middle" text-anchor="middle" fill="white" font-size="15" font-family="Inter" font-weight="800">Z</text>
+        </svg>
+      </div>
+      <div>
+        <div class="logo-text">Zomato</div>
+        <div class="logo-sub">Partner Panel</div>
+      </div>
     </div>
+
+    <div class="sidebar-section-label">Management</div>
     <nav class="sidebar-nav">
       <button class="nav-item active" id="nav-restaurant" onclick="showPage('restaurant')">
-        <span class="nav-icon">🏪</span>
+        <span class="nav-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        </span>
         <span>Add Restaurant</span>
       </button>
       <button class="nav-item" id="nav-menuitem" onclick="showPage('menuitem')">
-        <span class="nav-icon">🍕</span>
+        <span class="nav-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z"/><path d="M12 6v6l4 2"/></svg>
+        </span>
         <span>Add Menu Item</span>
       </button>
     </nav>
+
     <div class="sidebar-footer">
-      <div class="api-status" id="api-status">
-        <span class="status-dot"></span>
-        <span id="api-status-text">Checking API…</span>
+      <div class="api-status-card" id="api-status">
+        <span class="status-dot" id="status-dot"></span>
+        <div class="status-info">
+          <span class="status-label" id="api-status-text">Checking API…</span>
+          <span class="status-url">localhost:9090</span>
+        </div>
       </div>
     </div>
   </aside>
@@ -42,167 +60,263 @@
     <!-- TOPBAR -->
     <header class="topbar">
       <div class="topbar-left">
-        <button class="menu-toggle" id="menu-toggle" onclick="toggleSidebar()" aria-label="Toggle sidebar">☰</button>
+        <button class="menu-toggle" id="menu-toggle" onclick="toggleSidebar()" aria-label="Toggle sidebar">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
         <div class="breadcrumb" id="breadcrumb">
-          <span>Dashboard</span>
-          <span class="bc-sep">›</span>
+          <span class="bc-home">Dashboard</span>
+          <span class="bc-sep">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+          </span>
           <span id="bc-current">Add Restaurant</span>
         </div>
       </div>
       <div class="topbar-right">
-        <span class="topbar-tag">Backend: <code>localhost:9090</code></span>
+        <div class="topbar-user">
+          <div class="user-avatar">A</div>
+          <span class="user-name">Admin</span>
+        </div>
       </div>
     </header>
 
     <!-- PAGE: ADD RESTAURANT -->
     <section class="page active" id="page-restaurant">
       <div class="page-header">
-        <h1 class="page-title">🏪 Add Restaurant</h1>
-        <p class="page-subtitle">Register a new restaurant — maps to <code>POST /restaurant</code></p>
+        <div class="page-title-row">
+          <div>
+            <h1 class="page-title">Add Restaurant</h1>
+            <p class="page-subtitle">Register a new restaurant partner on the platform</p>
+          </div>
+          <div class="endpoint-badge">
+            <span class="method-badge">POST</span>
+            <code>/restaurant</code>
+          </div>
+        </div>
       </div>
 
-      <div class="card form-card">
-        <form id="form-restaurant" novalidate>
+      <div class="form-wrapper">
+        <div class="form-layout">
 
-          <div class="form-section-label">Basic Info</div>
-          <div class="form-grid">
-            <div class="form-group">
-              <label for="r-name">Restaurant Name <span class="req">*</span></label>
-              <input type="text" id="r-name" placeholder="e.g. Pizza Palace" autocomplete="off" />
-              <span class="field-hint">Letters and spaces only</span>
-              <span class="field-error" id="err-r-name"></span>
-            </div>
-            <div class="form-group">
-              <label for="r-phone">Phone Number <span class="req">*</span></label>
-              <input type="text" id="r-phone" placeholder="e.g. 9876543210" maxlength="10" autocomplete="off" />
-              <span class="field-hint">10-digit Indian mobile (starts with 6–9)</span>
-              <span class="field-error" id="err-r-phone"></span>
+          <!-- LEFT COLUMN -->
+          <div class="form-main">
+            <div class="card">
+              <div class="card-header">
+                <div class="card-icon card-icon--blue">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+                </div>
+                <h2 class="card-title">Basic Information</h2>
+              </div>
+              <form id="form-restaurant" novalidate>
+                <div class="form-grid">
+                  <div class="form-group col-full">
+                    <label for="r-name">Restaurant Name <span class="req">*</span></label>
+                    <input type="text" id="r-name" placeholder="e.g. Pizza Palace" autocomplete="off" />
+                    <span class="field-error" id="err-r-name"></span>
+                  </div>
+                  <div class="form-group col-full">
+                    <label for="r-phone">Phone Number <span class="req">*</span></label>
+                    <div class="input-with-prefix">
+                      <span class="input-prefix">+91</span>
+                      <input type="text" id="r-phone" placeholder="9876543210" maxlength="10" autocomplete="off" />
+                    </div>
+                    <span class="field-hint">10-digit Indian mobile (starts with 6–9)</span>
+                    <span class="field-error" id="err-r-phone"></span>
+                  </div>
+                </div>
+
+                <div class="section-divider">
+                  <span>Address Details</span>
+                </div>
+                <div class="form-grid">
+                  <div class="form-group col-full">
+                    <label for="r-street1">Street Line 1 <span class="req">*</span></label>
+                    <input type="text" id="r-street1" placeholder="e.g. 123, MG Road, Connaught Place" autocomplete="off" />
+                    <span class="field-error" id="err-r-street1"></span>
+                  </div>
+                  <div class="form-group col-full">
+                    <label for="r-street2">Street Line 2 <span class="optional">(optional)</span></label>
+                    <input type="text" id="r-street2" placeholder="e.g. Near City Mall, Landmark" autocomplete="off" />
+                  </div>
+                  <div class="form-group">
+                    <label for="r-pincode">Pin Code <span class="req">*</span></label>
+                    <input type="text" id="r-pincode" placeholder="110001" maxlength="6" autocomplete="off" />
+                    <span class="field-hint">6-digit, cannot start with 0</span>
+                    <span class="field-error" id="err-r-pincode"></span>
+                  </div>
+                  <div class="form-group">
+                    <label for="r-state">State <span class="req">*</span></label>
+                    <input type="text" id="r-state" placeholder="e.g. Maharashtra" autocomplete="off" />
+                    <span class="field-error" id="err-r-state"></span>
+                  </div>
+                  <div class="form-group col-full">
+                    <label for="r-country">Country <span class="req">*</span></label>
+                    <input type="text" id="r-country" placeholder="e.g. India" autocomplete="off" />
+                    <span class="field-error" id="err-r-country"></span>
+                  </div>
+                </div>
+
+                <div class="section-divider">
+                  <span>Geo Coordinates</span>
+                </div>
+                <div class="form-grid">
+                  <div class="form-group">
+                    <label for="r-lat">Latitude <span class="req">*</span></label>
+                    <input type="number" id="r-lat" placeholder="e.g. 19.076090" step="any" autocomplete="off" />
+                    <span class="field-hint">Between -90 and 90</span>
+                    <span class="field-error" id="err-r-lat"></span>
+                  </div>
+                  <div class="form-group">
+                    <label for="r-lng">Longitude <span class="req">*</span></label>
+                    <input type="number" id="r-lng" placeholder="e.g. 72.877426" step="any" autocomplete="off" />
+                    <span class="field-hint">Between -180 and 180</span>
+                    <span class="field-error" id="err-r-lng"></span>
+                  </div>
+                </div>
+
+                <div class="form-actions">
+                  <button type="button" class="btn-secondary" onclick="resetForm('form-restaurant')">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.31"/></svg>
+                    Reset
+                  </button>
+                  <button type="submit" class="btn-primary" id="btn-restaurant-submit">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    <span class="btn-label">Add Restaurant</span>
+                    <span class="btn-spinner hidden" id="spinner-restaurant"></span>
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
 
-          <div class="form-section-label">Address</div>
-          <div class="form-grid">
-            <div class="form-group col-full">
-              <label for="r-street1">Street Line 1 <span class="req">*</span></label>
-              <input type="text" id="r-street1" placeholder="e.g. 123, MG Road" autocomplete="off" />
-              <span class="field-error" id="err-r-street1"></span>
-            </div>
-            <div class="form-group col-full">
-              <label for="r-street2">Street Line 2 <span class="optional">(optional)</span></label>
-              <input type="text" id="r-street2" placeholder="e.g. Near City Mall" autocomplete="off" />
-            </div>
-            <div class="form-group">
-              <label for="r-pincode">Pin Code <span class="req">*</span></label>
-              <input type="text" id="r-pincode" placeholder="e.g. 110001" maxlength="6" autocomplete="off" />
-              <span class="field-hint">6-digit, cannot start with 0</span>
-              <span class="field-error" id="err-r-pincode"></span>
-            </div>
-            <div class="form-group">
-              <label for="r-state">State <span class="req">*</span></label>
-              <input type="text" id="r-state" placeholder="e.g. Maharashtra" autocomplete="off" />
-              <span class="field-error" id="err-r-state"></span>
-            </div>
-            <div class="form-group">
-              <label for="r-country">Country <span class="req">*</span></label>
-              <input type="text" id="r-country" placeholder="e.g. India" autocomplete="off" />
-              <span class="field-error" id="err-r-country"></span>
+          <!-- RIGHT SIDEBAR CARD -->
+          <div class="form-aside">
+            <div class="card tips-card">
+              <h3 class="tips-title">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                Quick Tips
+              </h3>
+              <ul class="tips-list">
+                <li>Restaurant name should be unique across the platform.</li>
+                <li>Phone number must be a valid 10-digit Indian mobile starting with 6, 7, 8, or 9.</li>
+                <li>Pin code must be exactly 6 digits and cannot start with 0.</li>
+                <li>Coordinates help customers find your restaurant on the map.</li>
+              </ul>
             </div>
           </div>
 
-          <div class="form-section-label">Geo Coordinates</div>
-          <div class="form-grid">
-            <div class="form-group">
-              <label for="r-lat">Latitude <span class="req">*</span></label>
-              <input type="number" id="r-lat" placeholder="e.g. 19.076090" step="any" autocomplete="off" />
-              <span class="field-hint">Between -90 and 90</span>
-              <span class="field-error" id="err-r-lat"></span>
-            </div>
-            <div class="form-group">
-              <label for="r-lng">Longitude <span class="req">*</span></label>
-              <input type="number" id="r-lng" placeholder="e.g. 72.877426" step="any" autocomplete="off" />
-              <span class="field-hint">Between -180 and 180</span>
-              <span class="field-error" id="err-r-lng"></span>
-            </div>
-          </div>
-
-          <div class="form-actions">
-            <button type="button" class="btn-secondary" onclick="resetForm('form-restaurant')">Reset</button>
-            <button type="submit" class="btn-primary" id="btn-restaurant-submit">
-              <span class="btn-label">Add Restaurant</span>
-              <span class="btn-spinner hidden" id="spinner-restaurant"></span>
-            </button>
-          </div>
-        </form>
+        </div>
       </div>
     </section>
 
     <!-- PAGE: ADD MENU ITEM -->
     <section class="page" id="page-menuitem">
       <div class="page-header">
-        <h1 class="page-title">🍕 Add Menu Item</h1>
-        <p class="page-subtitle">Add a new dish to a restaurant — maps to <code>POST /menuitem</code></p>
+        <div class="page-title-row">
+          <div>
+            <h1 class="page-title">Add Menu Item</h1>
+            <p class="page-subtitle">Add a new dish or drink to an existing restaurant</p>
+          </div>
+          <div class="endpoint-badge">
+            <span class="method-badge">POST</span>
+            <code>/menuitem</code>
+          </div>
+        </div>
       </div>
 
-      <div class="card form-card">
-        <form id="form-menuitem" novalidate>
+      <div class="form-wrapper">
+        <div class="form-layout">
 
-          <div class="form-section-label">Item Details</div>
-          <div class="form-grid">
-            <div class="form-group">
-              <label for="m-name">Item Name <span class="req">*</span></label>
-              <input type="text" id="m-name" placeholder="e.g. Paneer Tikka" autocomplete="off" />
-              <span class="field-error" id="err-m-name"></span>
-            </div>
-            <div class="form-group">
-              <label for="m-label">Label <span class="req">*</span></label>
-              <input type="text" id="m-label" placeholder="e.g. Bestseller" autocomplete="off" />
-              <span class="field-hint">Letters and spaces only</span>
-              <span class="field-error" id="err-m-label"></span>
-            </div>
-            <div class="form-group col-full">
-              <label for="m-description">Description <span class="req">*</span></label>
-              <input type="text" id="m-description" placeholder="e.g. Spicy grilled cottage cheese" autocomplete="off" />
-              <span class="field-error" id="err-m-description"></span>
-            </div>
-            <div class="form-group">
-              <label for="m-type">Item Type <span class="req">*</span></label>
-              <div class="type-toggle">
-                <button type="button" class="type-btn active" id="type-veg" onclick="selectType('VEG')">
-                  <span class="veg-dot"></span> VEG
-                </button>
-                <button type="button" class="type-btn" id="type-nonveg" onclick="selectType('NONVEG')">
-                  <span class="nonveg-dot"></span> NON-VEG
-                </button>
+          <!-- LEFT COLUMN -->
+          <div class="form-main">
+            <div class="card">
+              <div class="card-header">
+                <div class="card-icon card-icon--red">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
+                </div>
+                <h2 class="card-title">Item Details</h2>
               </div>
-              <input type="hidden" id="m-type" value="VEG" />
-              <span class="field-error" id="err-m-type"></span>
-            </div>
-            <div class="form-group">
-              <label for="m-restaurant-id">Restaurant ID <span class="req">*</span></label>
-              <input type="number" id="m-restaurant-id" placeholder="e.g. 1" min="1" autocomplete="off" />
-              <span class="field-hint">ID of the restaurant this item belongs to</span>
-              <span class="field-error" id="err-m-restaurant-id"></span>
+              <form id="form-menuitem" novalidate>
+                <div class="form-grid">
+                  <div class="form-group">
+                    <label for="m-name">Item Name <span class="req">*</span></label>
+                    <input type="text" id="m-name" placeholder="e.g. Paneer Tikka" autocomplete="off" />
+                    <span class="field-error" id="err-m-name"></span>
+                  </div>
+                  <div class="form-group">
+                    <label for="m-label">Label <span class="req">*</span></label>
+                    <input type="text" id="m-label" placeholder="e.g. Bestseller" autocomplete="off" />
+                    <span class="field-hint">Letters and spaces only</span>
+                    <span class="field-error" id="err-m-label"></span>
+                  </div>
+                  <div class="form-group col-full">
+                    <label for="m-description">Description <span class="req">*</span></label>
+                    <input type="text" id="m-description" placeholder="e.g. Spicy grilled cottage cheese with mint chutney" autocomplete="off" />
+                    <span class="field-error" id="err-m-description"></span>
+                  </div>
+                  <div class="form-group">
+                    <label>Item Type <span class="req">*</span></label>
+                    <div class="type-toggle">
+                      <button type="button" class="type-btn active" id="type-veg" onclick="selectType('VEG')">
+                        <span class="veg-dot"></span> VEG
+                      </button>
+                      <button type="button" class="type-btn" id="type-nonveg" onclick="selectType('NONVEG')">
+                        <span class="nonveg-dot"></span> NON-VEG
+                      </button>
+                    </div>
+                    <input type="hidden" id="m-type" value="VEG" />
+                  </div>
+                  <div class="form-group">
+                    <label for="m-restaurant-id">Restaurant ID <span class="req">*</span></label>
+                    <input type="number" id="m-restaurant-id" placeholder="e.g. 1" min="1" autocomplete="off" />
+                    <span class="field-hint">ID of the restaurant this item belongs to</span>
+                    <span class="field-error" id="err-m-restaurant-id"></span>
+                  </div>
+                </div>
+
+                <!-- VARIANTS SECTION -->
+                <div class="section-divider">
+                  <span>Item Variants</span>
+                  <button type="button" class="btn-add-variant" id="btn-add-variant" onclick="addVariant()">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    Add Variant
+                  </button>
+                </div>
+                <p class="variants-hint">Variants are optional — but if added, Name and Price (₹) are required per variant.</p>
+                <div id="variants-container"></div>
+
+                <div class="form-actions">
+                  <button type="button" class="btn-secondary" onclick="resetMenuItemForm()">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.31"/></svg>
+                    Reset
+                  </button>
+                  <button type="submit" class="btn-primary" id="btn-menuitem-submit">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    <span class="btn-label">Add Menu Item</span>
+                    <span class="btn-spinner hidden" id="spinner-menuitem"></span>
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
 
-          <!-- VARIANTS SECTION -->
-          <div class="form-section-label">
-            Item Variants
-            <button type="button" class="btn-add-variant" id="btn-add-variant" onclick="addVariant()">+ Add Variant</button>
+          <!-- RIGHT SIDEBAR CARD -->
+          <div class="form-aside">
+            <div class="card tips-card">
+              <h3 class="tips-title">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                Quick Tips
+              </h3>
+              <ul class="tips-list">
+                <li>Item name must be unique within the same restaurant.</li>
+                <li>Label examples: <em>Bestseller</em>, <em>Must Try</em>, <em>New</em>.</li>
+                <li>Select VEG or NON-VEG carefully — this affects how the item is shown to customers.</li>
+                <li>Variants let you add sizes (Small, Medium, Large) with different prices.</li>
+                <li>Enable "Manage Inventory" on a variant to track stock count.</li>
+              </ul>
+            </div>
           </div>
-          <div id="variants-container">
-            <!-- variants injected by JS -->
-          </div>
-          <p class="variants-hint">Variants are optional — but if added, Name and Price (₹) are required per variant.</p>
 
-          <div class="form-actions">
-            <button type="button" class="btn-secondary" onclick="resetMenuItemForm()">Reset</button>
-            <button type="submit" class="btn-primary" id="btn-menuitem-submit">
-              <span class="btn-label">Add Menu Item</span>
-              <span class="btn-spinner hidden" id="spinner-menuitem"></span>
-            </button>
-          </div>
-        </form>
+        </div>
       </div>
     </section>
 
