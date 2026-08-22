@@ -3,6 +3,90 @@
    ============================== */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+/* ==============================
+   LOGO IMAGE
+   ============================== */
+.logo-img {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  object-fit: cover;
+  display: block;
+}
+
+/* ==============================
+   FOOD HERO BANNER
+   ============================== */
+.food-hero {
+  position: relative;
+  width: 100%;
+  height: 200px;
+  overflow: hidden;
+  border-radius: 0 0 0 0;
+}
+
+.food-hero-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 60%;
+  display: block;
+  filter: brightness(0.75);
+}
+
+.food-hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    rgba(0,0,0,0.65) 0%,
+    rgba(0,0,0,0.3) 60%,
+    rgba(0,0,0,0.05) 100%
+  );
+  display: flex;
+  align-items: center;
+  padding: 0 40px;
+}
+
+.food-hero-content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  animation: fadeUp 0.4s ease;
+}
+
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(226, 55, 68, 0.9);
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  width: fit-content;
+}
+
+.hero-title {
+  font-size: 1.55rem;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: -0.4px;
+  line-height: 1.2;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+.hero-desc {
+  font-size: 0.83rem;
+  color: rgba(255,255,255,0.82);
+  max-width: 420px;
+  line-height: 1.5;
+}
+
+
+
 :root {
   --brand:        #E23744;
   --brand-dark:   #CB202D;
