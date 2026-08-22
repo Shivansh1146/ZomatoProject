@@ -32,10 +32,12 @@ public class MenuItemService {
             return "already menu item exist";
 
         }
-        for (MenuItemVariantRequestDTO menuItemVariantRequestDTOList : menuItemRequestDTO.getMenuItemVariantRequestDTOList()) {
+        if (menuItemRequestDTO.getMenuItemVariantRequestDTOList() != null) {
+            for (MenuItemVariantRequestDTO menuItemVariantRequestDTOList : menuItemRequestDTO.getMenuItemVariantRequestDTOList()) {
 
-            if (Boolean.TRUE.equals(menuItemVariantRequestDTOList.getInventoryManaged()) && menuItemVariantRequestDTOList.getCurrentAvailableInventoryCount() == null) {
-                return "inventory count is required when inventory is  managed ";
+                if (Boolean.TRUE.equals(menuItemVariantRequestDTOList.getInventoryManaged()) && menuItemVariantRequestDTOList.getCurrentAvailableInventoryCount() == null) {
+                    return "inventory count is required when inventory is  managed ";
+                }
             }
         }
 
@@ -59,22 +61,24 @@ public class MenuItemService {
         List<MenuItemVariant> menuItemVariantList = new ArrayList<>();
 
         List<MenuItemVariantRequestDTO> menuItemVariantRequestDTOSByUser = menuItemRequestDTO.getMenuItemVariantRequestDTOList();
-        for (MenuItemVariantRequestDTO menuItemVariantRequestDTO : menuItemVariantRequestDTOSByUser) {
-            MenuItemVariant menuItemVariant = new MenuItemVariant();
+       if (menuItemVariantRequestDTOSByUser != null) {
+           for (MenuItemVariantRequestDTO menuItemVariantRequestDTO : menuItemVariantRequestDTOSByUser) {
+               MenuItemVariant menuItemVariant = new MenuItemVariant();
 
-            menuItemVariant.setMenuVariantName(menuItemVariantRequestDTO.getMenuVariantName());
-            menuItemVariant.setMenuVariantPrice(menuItemVariantRequestDTO.getMenuVariantPrice());
-            menuItemVariant.setMenuVariantAvailable(menuItemVariantRequestDTO.getMenuVariantAvailable());
-            menuItemVariant.setInventoryManaged(menuItemVariantRequestDTO.getInventoryManaged());
-            if (Boolean.TRUE.equals(menuItemVariantRequestDTO.getInventoryManaged())) {
-                menuItemVariant.setCurrentAvailableInventoryCount(menuItemVariantRequestDTO.getCurrentAvailableInventoryCount());
-            } else {
-                menuItemVariant.setCurrentAvailableInventoryCount(0L);
-            }
-            menuItemVariant.setMenuItem(menuItem);
+               menuItemVariant.setMenuVariantName(menuItemVariantRequestDTO.getMenuVariantName());
+               menuItemVariant.setMenuVariantPrice(menuItemVariantRequestDTO.getMenuVariantPrice());
+               menuItemVariant.setMenuVariantAvailable(menuItemVariantRequestDTO.getMenuVariantAvailable());
+               menuItemVariant.setInventoryManaged(menuItemVariantRequestDTO.getInventoryManaged());
+               if (Boolean.TRUE.equals(menuItemVariantRequestDTO.getInventoryManaged())) {
+                   menuItemVariant.setCurrentAvailableInventoryCount(menuItemVariantRequestDTO.getCurrentAvailableInventoryCount());
+               } else {
+                   menuItemVariant.setCurrentAvailableInventoryCount(0L);
+               }
+               menuItemVariant.setMenuItem(menuItem);
 
-            menuItemVariantList.add(menuItemVariant);
-        }
+               menuItemVariantList.add(menuItemVariant);
+           }
+       }
         menuItem.setMenuItemVariantList(menuItemVariantList);
         return menuItem;
     }
