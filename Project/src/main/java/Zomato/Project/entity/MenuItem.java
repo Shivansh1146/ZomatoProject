@@ -24,6 +24,7 @@ public class MenuItem extends Base {
     private String menuItemDescription;
 
     @Column(name = "type", nullable = false)
+    @Enumerated(value = EnumType.STRING)
     private MenuItemType menuItemType;
 
     @Column(name = "rating")
