@@ -43,21 +43,16 @@ async function checkApiStatus() {
   const dot  = document.querySelector('.status-dot');
   const text = document.getElementById('api-status-text');
   try {
-    const res = await fetch(`${BASE_URL}/actuator/health`, { signal: AbortSignal.timeout(3000) });
-    if (res.ok) {
+    // Ping the known endpoint to see if the server responds
+    const res = await fetch(`${BASE_URL}/restaurant`, { signal: AbortSignal.timeout(3000) });
+    // Even if it returns 400 or something, if it responds with CORS headers, it's online.
+    if (res.ok || res.status) {
       dot.className  = 'status-dot online';
       text.textContent = 'API Online';
-    } else throw new Error();
-  } catch {
-    // Try a simple connectivity check on root
-    try {
-      await fetch(`${BASE_URL}/`, { signal: AbortSignal.timeout(2000) });
-      dot.className  = 'status-dot online';
-      text.textContent = 'API Online';
-    } catch {
-      dot.className  = 'status-dot offline';
-      text.textContent = 'API Offline';
     }
+  } catch {
+    dot.className  = 'status-dot offline';
+    text.textContent = 'API Offline';
   }
 }
 
