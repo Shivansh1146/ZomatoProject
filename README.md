@@ -41,7 +41,7 @@
 - 🕒 **Audit Timestamps** — Automatic creation timestamps on all entities via `@CreationTimestamp`
 - ✅ **Request Validation** — Full input validation using `spring-boot-starter-validation` (mirrored in frontend)
 - 🏛️ **Layered Architecture** — Clean separation between Controller → Service → Repository → Entity layers
-- 🎨 **Admin Panel Frontend** — Includes a stunning, fully-responsive dark-theme frontend to easily add restaurants and manage complex menu items.
+- 🎨 **Admin Panel Frontend** — Includes a stunning, fully-responsive light-theme frontend built with Zomato aesthetics to view dashboards, add restaurants, and manage complex menu items.
 
 ---
 
@@ -102,17 +102,19 @@ User ───────────────── standalone entity
 
 ### 🏪 Restaurant
 
-| Method | Endpoint       | Description           | Body                     |
-|--------|----------------|-----------------------|--------------------------|
-| `POST` | `/restaurant`  | Register a restaurant | `RestaurantRequestDTO`   |
+| Method | Endpoint         | Description           | Body / Response          |
+|--------|------------------|-----------------------|--------------------------|
+| `POST` | `/restaurant`    | Register a restaurant | Req: `RestaurantRequestDTO`  |
+| `GET`  | `/restaurant`    | Get all restaurants   | Res: `List<RestaurantResponseDTO>` |
+| `GET`  | `/restaurant/{id}`| Get specific restaurant| Res: `RestaurantResponseDTO` |
 
 ### 🍕 Menu Item
 
-| Method | Endpoint      | Description       | Body                    |
+| Method | Endpoint      | Description       | Body / Response         |
 |--------|---------------|-------------------|-------------------------|
-| `POST` | `/menuitem`   | Add a menu item   | `MenuItemRequestDTO`    |
+| `POST` | `/menuitem`   | Add a menu item   | Req: `MenuItemRequestDTO`   |
 
-> 💡 All endpoints return `HTTP 201 Created` on success with a descriptive message body.
+> 💡 `POST` endpoints return `HTTP 201 Created` on success. `GET` endpoints return `HTTP 200 OK`.
 
 ---
 
