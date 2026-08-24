@@ -606,6 +606,8 @@ function navigateToAddMenuItem() {
   if (currentViewRestaurantId) {
     document.getElementById('m-restaurant-id').value = currentViewRestaurantId;
   }
+  showPage('menuitem');
+}
 
 async function fetchAllRestaurants() {
   const tbody = document.getElementById('restaurants-tbody');
@@ -651,7 +653,3 @@ function viewRestaurantFromTable(id) {
   // Trigger form submit
   document.getElementById('form-search-restaurant').dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
 }
-
-  showPage('menuitem');
-}
-
