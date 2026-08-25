@@ -87,7 +87,10 @@ async function fetchFoodImage(itemName, itemType, elementId) {
     }
   } catch (e) { }
 
-  foodImageCache[cacheKey] = null;
+  // If TheMealDB fails or has no meals (like drinks), use LoremFlickr dynamic image!
+  const fallbackUrl = `https://loremflickr.com/300/300/${encodeURIComponent(searchTerm)},food/all`;
+  foodImageCache[cacheKey] = fallbackUrl;
+  applyFoodImage(elementId, fallbackUrl, itemName, false);
 }
 
 function getGradient(itemType, nameKey) {
