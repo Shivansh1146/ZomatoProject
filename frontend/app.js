@@ -516,6 +516,7 @@ document.addEventListener('blur', (e) => {
    VIEW RESTAURANT — FETCH & RENDER
    ──────────────────────────────────────── */
 let currentViewRestaurantId = null;
+const variantStateCache = {}; // Cache for variant inventory settings (managed & count)
 
 document.getElementById('form-search-restaurant').addEventListener('submit', async (e) => {
   e.preventDefault();
@@ -565,16 +566,20 @@ function renderRestaurantDetails(data) {
     listContainer.innerHTML = `<div style="font-size: 0.85rem; color: var(--text-dim); font-style: italic;">No menu items found.</div>`;
   } else {
     menuItems.forEach(item => {
-      const variants = item.menuItemVariantResponseDTOList || [];
-      const variantHtml = variants.map(v => 
-        `<div style="display: inline-flex; align-items: center; gap: 6px; background: var(--bg-card); padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; color: var(--text-base); margin-right: 8px; margin-top: 8px; border: 1px solid var(--border); box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
-          <span><strong>${v.menuVariantName}</strong> (₹${v.menuVariantPrice}) - <span style="color: ${v.menuVariantAvailable ? 'var(--green)' : 'var(--red)'};">${v.menuVariantAvailable ? 'Available' : 'Unavailable'}</span></span>
-          <button type="button" onclick="openEditVariantModal(${v.menuVariantId}, ${item.menuItemId}, ${data.restaurantId || currentViewRestaurantId}, '${v.menuVariantName.replace(/'/g,"\\'")}', ${v.menuVariantPrice}, ${v.menuVariantAvailable}, ${v.inventoryManaged !== false}, ${v.currentAvailableInventoryCount || 50})"
+      const variantHtml = variants.map(v => {
+        const cached = variantStateCache[v.menuVariantId] || {};
+        const isManaged = cached.managed !== undefined ? cached.managed : (v.inventoryManaged !== undefined ? v.inventoryManaged : true);
+        const stockCount = cached.count !== undefined ? cached.count : (v.currentAvailableInventoryCount || 50);
+        const stockBadge = isManaged ? `<span style="font-size:0.7rem; color:var(--text-muted); margin-left:4px;">📦 Stock: ${stockCount}</span>` : `<span style="font-size:0.7rem; color:var(--text-muted); margin-left:4px;">🚫 No Tracking</span>`;
+
+        return `<div style="display: inline-flex; align-items: center; gap: 6px; background: var(--bg-card); padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; color: var(--text-base); margin-right: 8px; margin-top: 8px; border: 1px solid var(--border); box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
+          <span><strong>${v.menuVariantName}</strong> (₹${v.menuVariantPrice}) - <span style="color: ${v.menuVariantAvailable ? 'var(--green)' : 'var(--red)'};">${v.menuVariantAvailable ? 'Available' : 'Unavailable'}</span> ${stockBadge}</span>
+          <button type="button" onclick="openEditVariantModal(${v.menuVariantId}, ${item.menuItemId}, ${data.restaurantId || currentViewRestaurantId}, '${v.menuVariantName.replace(/'/g,"\\'")}', ${v.menuVariantPrice}, ${v.menuVariantAvailable}, ${isManaged}, ${stockCount})"
             style="background: var(--brand-light); border: 1px solid var(--brand); cursor: pointer; font-size: 0.7rem; padding: 2px 8px; border-radius: 4px; color: var(--brand); font-weight: 600; transition: all 0.2s;"
             onmouseover="this.style.background='var(--brand)';this.style.color='#fff';"
             onmouseout="this.style.background='var(--brand-light)';this.style.color='var(--brand)';" title="Edit this variant">✏️ Edit Variant</button>
-        </div>`
-      ).join('');
+        </div>`;
+      }).join('');
 
       const typeDot = item.menuItemType === 'VEG' 
         ? `<span class="veg-dot" style="display: inline-block;"></span>` 
@@ -784,6 +789,7 @@ async function submitEditVariant() {
     });
     const text = await res.text();
     if (res.status === 201) {
+      variantStateCache[variantId] = { managed, count };
       showToast('success', 'Variant Updated! ✅', text);
       closeEditVariantModal();
       document.getElementById('form-search-restaurant').dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
