@@ -540,6 +540,7 @@ document.getElementById('form-search-restaurant').addEventListener('submit', asy
       const data = JSON.parse(text);
       currentViewRestaurantId = data.restaurantId || id;
       renderRestaurantDetails(data);
+      showToast('success', 'Found!', `Loaded details for ${data.restaurantName}`);
     } else if (res.status === 404) {
       showToast('error', 'Not Found', 'Restaurant not found with this ID.');
     } else {
@@ -703,13 +704,16 @@ async function submitEditMenuItem() {
       body: JSON.stringify(payload),
     });
     const text = await res.text();
-    if (res.status === 201) {
-      showToast('success', 'Menu Item Updated! ✅', text);
+    let errorMsg = text;
+    try { const json = JSON.parse(text); if (json.message || json.error) errorMsg = json.message || json.error; } catch (e) {}
+    
+    if (res.status === 201 || res.status === 200) {
+      showToast('success', 'Menu Item Updated! ✅', text || 'Menu item updated successfully.');
       closeEditModal();
       // Refresh the restaurant view to show updated data
       document.getElementById('form-search-restaurant').dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
     } else {
-      showToast('error', `Error ${res.status}`, text || 'Update failed.');
+      showToast('error', `Error ${res.status}`, errorMsg || 'Update failed.');
     }
   } catch (err) {
     console.error(err);
@@ -811,13 +815,16 @@ async function submitEditVariant() {
       body: JSON.stringify(payload),
     });
     const text = await res.text();
-    if (res.status === 201) {
+    let errorMsg = text;
+    try { const json = JSON.parse(text); if (json.message || json.error) errorMsg = json.message || json.error; } catch (e) {}
+
+    if (res.status === 201 || res.status === 200) {
       variantStateCache[variantId] = { managed, count };
-      showToast('success', 'Variant Updated! ✅', text);
+      showToast('success', 'Variant Updated! ✅', text || 'Variant updated successfully.');
       closeEditVariantModal();
       document.getElementById('form-search-restaurant').dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
     } else {
-      showToast('error', `Error ${res.status}`, text || 'Variant update failed.');
+      showToast('error', `Error ${res.status}`, errorMsg || 'Variant update failed.');
     }
   } catch (err) {
     console.error(err);
@@ -838,11 +845,16 @@ async function deleteMenuItemApi(menuItemId) {
       method: 'DELETE'
     });
     const text = await res.text();
+    let errorMsg = text;
+    try { const json = JSON.parse(text); if (json.message || json.error) errorMsg = json.message || json.error; } catch (e) {}
+
     if (res.ok) {
-      showToast('success', 'Menu Item Deleted! 🗑️', text);
+      showToast('success', 'Menu Item Deleted! 🗑️', text || 'Menu item successfully deleted.');
       document.getElementById('form-search-restaurant').dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+    } else if (res.status === 404) {
+      showToast('error', 'Not Found', 'Menu item not found or already deleted.');
     } else {
-      showToast('error', `Error ${res.status}`, text || 'Delete failed.');
+      showToast('error', `Error ${res.status}`, errorMsg || 'Delete failed.');
     }
   } catch (err) {
     console.error(err);
@@ -861,9 +873,11 @@ async function fetchAllRestaurants() {
       const text = await res.text();
       if (!text.trim()) {
         renderAllRestaurantsTable([]);
+        showToast('info', 'No Data', 'No restaurants found in the database.');
       } else {
         const data = JSON.parse(text);
         renderAllRestaurantsTable(data);
+        showToast('success', 'Refreshed', `Loaded ${data.length} restaurants.`);
       }
     } else {
       tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 20px; color: var(--red);">Endpoint GET /restaurant not found or failed (HTTP ${res.status}). You must implement this in Spring Boot!</td></tr>`;
@@ -915,16 +929,21 @@ async function deleteRestaurantApi(restaurantId) {
   try {
     const res = await fetch(`${BASE_URL}/restaurant/${restaurantId}`, { method: 'DELETE' });
     const text = await res.text();
+    let errorMsg = text;
+    try { const json = JSON.parse(text); if (json.message || json.error) errorMsg = json.message || json.error; } catch (e) {}
+
     if (res.ok) {
-      showToast('success', 'Restaurant Deleted! 🗑️', text);
+      showToast('success', 'Restaurant Deleted! 🗑️', text || 'Successfully deleted the restaurant.');
       // Hide the details card if the deleted restaurant was being viewed
       if (String(currentViewRestaurantId) === String(restaurantId)) {
         document.getElementById('restaurant-details-card').classList.add('hidden');
         currentViewRestaurantId = null;
       }
       fetchAllRestaurants();
+    } else if (res.status === 404) {
+      showToast('error', 'Not Found', 'Restaurant not found or already deleted.');
     } else {
-      showToast('error', `Error ${res.status}`, text || 'Delete failed.');
+      showToast('error', `Error ${res.status}`, errorMsg || 'Delete failed.');
     }
   } catch (err) {
     console.error(err);
@@ -941,14 +960,19 @@ async function deleteVariantApi(variantId) {
   try {
     const res = await fetch(`${BASE_URL}/menuItemVariant/${variantId}`, { method: 'DELETE' });
     const text = await res.text();
+    let errorMsg = text;
+    try { const json = JSON.parse(text); if (json.message || json.error) errorMsg = json.message || json.error; } catch (e) {}
+
     if (res.ok) {
       // Remove from cache
       delete variantStateCache[variantId];
-      showToast('success', 'Variant Deleted! 🗑️', text);
+      showToast('success', 'Variant Deleted! 🗑️', text || 'Variant successfully deleted.');
       // Refresh the current restaurant view
       document.getElementById('form-search-restaurant').dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+    } else if (res.status === 404) {
+      showToast('error', 'Not Found', 'Variant not found or already deleted.');
     } else {
-      showToast('error', `Error ${res.status}`, text || 'Delete failed.');
+      showToast('error', `Error ${res.status}`, errorMsg || 'Delete failed.');
     }
   } catch (err) {
     console.error(err);
