@@ -1,6 +1,6 @@
 /* ============================================================
    ZOMATO ADMIN PANEL — app.js
-   Talks to Spring Boot backend at localhost:8080
+   Talks to Spring Boot backend at localhost:9090
    ============================================================ */
 
 const BASE_URL = 'http://localhost:9090';
@@ -468,7 +468,7 @@ document.getElementById('form-menuitem').addEventListener('submit', async (e) =>
   };
 
   try {
-    const res  = await fetch(`${BASE_URL}/menuitem`, {
+    const res  = await fetch(`${BASE_URL}/menuItem`, {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
       body:    JSON.stringify(payload),
