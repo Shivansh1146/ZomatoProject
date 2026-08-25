@@ -541,7 +541,8 @@ document.getElementById('form-search-restaurant').addEventListener('submit', asy
       showToast('error', `Error ${res.status}`, 'Failed to fetch restaurant details.');
     }
   } catch (err) {
-    showToast('error', 'Connection Failed', `Cannot reach backend at ${BASE_URL}.`);
+    console.error(err);
+    showToast('error', 'Error Occurred', err.message || `Cannot reach backend at ${BASE_URL}.`);
   } finally {
     setLoading('btn-search-restaurant', 'spinner-search', false);
   }
@@ -566,6 +567,7 @@ function renderRestaurantDetails(data) {
     listContainer.innerHTML = `<div style="font-size: 0.85rem; color: var(--text-dim); font-style: italic;">No menu items found.</div>`;
   } else {
     menuItems.forEach(item => {
+      const variants = item.menuItemVariantResponseDTOList || [];
       const variantHtml = variants.map(v => {
         const cached = variantStateCache[v.menuVariantId] || {};
         const isManaged = cached.managed !== undefined ? cached.managed : (v.inventoryManaged !== undefined ? v.inventoryManaged : true);
@@ -839,7 +841,8 @@ async function fetchAllRestaurants() {
       tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 20px; color: var(--red);">Endpoint GET /restaurant not found or failed (HTTP ${res.status}). You must implement this in Spring Boot!</td></tr>`;
     }
   } catch (err) {
-    tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 20px; color: var(--red);">Connection Failed. Is the backend running with GET /restaurant active?</td></tr>`;
+    console.error(err);
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 20px; color: var(--red);">Error: ${err.message || 'Connection Failed'}</td></tr>`;
   }
 }
 
