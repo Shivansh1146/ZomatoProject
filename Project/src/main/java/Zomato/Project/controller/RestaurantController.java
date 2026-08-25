@@ -2,10 +2,8 @@ package Zomato.Project.controller;
 
 import Zomato.Project.dto.RestaurantRequestDTO;
 import Zomato.Project.dto.RestaurantResponseDTO;
-import Zomato.Project.entity.Restaurant;
 import Zomato.Project.service.RestaurantService;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -35,8 +33,17 @@ public class RestaurantController {
     }
 
     @GetMapping
-    public ResponseEntity<List<RestaurantResponseDTO>> getAllRestaurant(){
+    public ResponseEntity<List<RestaurantResponseDTO>> getAllRestaurant() {
         return ResponseEntity.ok(restaurantService.getAllRestaurant());
+    }
+
+    @DeleteMapping("/{restaurantId}")
+    public ResponseEntity<String> deleteRestaurant(@PathVariable Long restaurantId) {
+        String response = restaurantService.deleteRestaurant(restaurantId);
+        if (response.equals("Successful Restaurant is deleted")) {
+            return ResponseEntity.ok(response);
+        }
+        return ResponseEntity.status(404).body(response);
     }
 }
 

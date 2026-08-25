@@ -3,6 +3,7 @@ package Zomato.Project.controller;
 import Zomato.Project.dto.CombineMenuItemAndMenuItemVariantRequestDTO;
 import Zomato.Project.dto.MenuItemRequestDTO;
 import Zomato.Project.dto.MenuItemVariantRequestDTO;
+import Zomato.Project.entity.Restaurant;
 import Zomato.Project.service.MenuItemVariantService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,5 +25,14 @@ public class MenuItemVariantController {
             return ResponseEntity.status(201).body(response);
         }
         return ResponseEntity.badRequest().body(response);
+    }
+
+    @DeleteMapping("/{menuItemVariantId}")
+    public ResponseEntity<String> deleteMenuItemVariant(@PathVariable Long menuItemVariantId){
+        String response = menuItemVariantService.deleteMenuItemVariant(menuItemVariantId);
+        if (response.equals("Successfully your Menu item Variant is deleted")){
+            return ResponseEntity.ok(response);
+        }
+        return ResponseEntity.status(404).body(response);
     }
 }

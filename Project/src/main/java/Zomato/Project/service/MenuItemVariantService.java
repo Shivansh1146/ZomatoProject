@@ -8,6 +8,8 @@ import Zomato.Project.repository.RestaurantRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 public class MenuItemVariantService {
     @Autowired
@@ -19,7 +21,7 @@ public class MenuItemVariantService {
         Long restaurantId = combineMenuItemAndMenuItemVariantRequestDTO.getRestaurantId();
         Long menuItemId = combineMenuItemAndMenuItemVariantRequestDTO.getMenuItemId();
 
-        Restaurant restaurant = restaurantRepository.findByIdAndMenuItemListIdAndMenuItemList_MenuItemVariantListId(restaurantId, menuItemId,menuItemVariantId);
+        Restaurant restaurant = restaurantRepository.findByIdAndMenuItemListIdAndMenuItemList_MenuItemVariantListId(restaurantId, menuItemId, menuItemVariantId);
         if (restaurant == null) {
             return "does not exist";
         }
@@ -36,5 +38,14 @@ public class MenuItemVariantService {
 
         return "Successfully your Menu item Variant is updated";
 
+    }
+
+    public String deleteMenuItemVariant(Long menuItemVariantId) {
+        Optional<MenuItemVariant> existingMenuItemVariant = menuItemVariantRepository.findById(menuItemVariantId);
+        if (existingMenuItemVariant.isEmpty()) {
+            return "does not exist menu Item variant";
+        }
+        menuItemVariantRepository.deleteById(menuItemVariantId);
+        return "Successfully your Menu item Variant is deleted";
     }
 }

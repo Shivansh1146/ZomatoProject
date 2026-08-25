@@ -126,4 +126,12 @@ public class RestaurantService {
     }
 
 
+    public String deleteRestaurant(Long restaurantId) {
+        Optional<Restaurant> existingRestaurant = restaurantRepository.findById(restaurantId);
+        if (existingRestaurant.isEmpty()) {
+            return "restaurant does not exist";
+        }
+        restaurantRepository.deleteById(restaurantId);
+        return "Successful Restaurant is deleted";
+    }
 }
