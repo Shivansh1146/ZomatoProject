@@ -1,4 +1,4 @@
-﻿/* ============================================================
+/* ============================================================
    ZOMATO ADMIN PANEL Ã¢â‚¬â€ app.js
    Talks to Spring Boot backend at localhost:9090
    ============================================================ */
@@ -741,23 +741,7 @@ function renderRestaurantDetails(data) {
                 
 â³
               </div>
-              <button type="button" onclick="openEditModal(${item.menuItemId}, ${data.restaurantId || currentViewRestaurantId}, 
-'
-${item.menuItemName.replace(/\x27/g,\\\x27)}
-'
-, 
-'
-${item.menuItemDescription.replace(/\x27/g,\\\x27)}
-'
-, 
-'
-${item.menuItemType}
-'
-, 
-'
-${item.menuItemLabel.replace(/\x27/g,\\\x27)}
-'
-)" style="background:#fff;color:var(--green);border:1px solid var(--border-input);font-weight:800;padding:6px 20px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.1);cursor:pointer;text-transform:uppercase;font-size:0.8rem;width:100%;">EDIT</button>
+              <button type="button" onclick="openEditModal(${item.menuItemId}, ${data.restaurantId || currentViewRestaurantId}, '${item.menuItemName.replace(/'/g,`\\'`).replace(/\\/g, `\\\\`)}', '${item.menuItemDescription.replace(/'/g,`\\'`).replace(/\\/g, `\\\\`)}', '${item.menuItemType}', '${item.menuItemLabel.replace(/'/g,`\\'`).replace(/\\/g, `\\\\`)}')" style="background:#fff;color:var(--green);border:1px solid var(--border-input);font-weight:800;padding:6px 20px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.1);cursor:pointer;text-transform:uppercase;font-size:0.8rem;width:100%;">EDIT</button>
               <button type="button" onclick="deleteMenuItemApi(${item.menuItemId})" style="background:none;border:none;color:var(--text-dim);font-size:0.75rem;text-decoration:underline;cursor:pointer;" onmouseover="this.style.color='var(--red)'" onmouseout="this.style.color='var(--text-dim)'">Delete Item</button>
           </div>
         </div>
@@ -1122,3 +1106,4 @@ async function deleteVariantApi(variantId) {
     showToast('error', 'Error Occurred', err.message || `Cannot reach backend at ${BASE_URL}.`);
   }
 }
+
