@@ -567,8 +567,10 @@ function renderRestaurantDetails(data) {
     menuItems.forEach(item => {
       const variants = item.menuItemVariantResponseDTOList || [];
       const variantHtml = variants.map(v => 
-        `<span style="display: inline-block; background: var(--bg-base); padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; color: var(--text-muted); margin-right: 6px; margin-top: 6px; border: 1px solid var(--border);">
-          ${v.menuVariantName} (₹${v.menuVariantPrice}) - ${v.menuVariantAvailable ? 'Available' : 'Unavailable'}
+        `<span style="display: inline-flex; align-items: center; gap: 4px; background: var(--bg-base); padding: 3px 8px; border-radius: 4px; font-size: 0.75rem; color: var(--text-muted); margin-right: 6px; margin-top: 6px; border: 1px solid var(--border);">
+          <span>${v.menuVariantName} (₹${v.menuVariantPrice}) - ${v.menuVariantAvailable ? 'Available' : 'Unavailable'}</span>
+          <button type="button" onclick="openEditVariantModal(${v.menuVariantId}, ${item.menuItemId}, ${data.restaurantId || currentViewRestaurantId}, '${v.menuVariantName.replace(/'/g,"\\'")}', ${v.menuVariantPrice}, ${v.menuVariantAvailable})"
+            style="background:none; border:none; cursor:pointer; font-size:0.65rem; padding:0 2px; color:var(--brand);" title="Edit Variant">✏️</button>
         </span>`
       ).join('');
 
@@ -678,6 +680,81 @@ async function submitEditMenuItem() {
     showToast('error', 'Connection Failed', `Cannot reach backend at ${BASE_URL}.`);
   } finally {
     setLoading('btn-edit-submit', 'spinner-edit', false);
+  }
+}
+
+/* ────────────────────────────────────────
+   EDIT MENU ITEM VARIANT MODAL
+   ──────────────────────────────────────── */
+function openEditVariantModal(variantId, menuItemId, restaurantId, name, price, available) {
+  document.getElementById('edit-variant-id').value = variantId;
+  document.getElementById('edit-variant-menu-item-id').value = menuItemId;
+  document.getElementById('edit-variant-restaurant-id').value = restaurantId;
+  document.getElementById('edit-v-name').value = name;
+  document.getElementById('edit-v-price').value = price;
+  document.getElementById('edit-v-available').value = String(available);
+  document.getElementById('edit-v-managed').value = 'true';
+  document.getElementById('edit-v-count').value = '50';
+
+  ['err-edit-v-name','err-edit-v-price'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = '';
+  });
+
+  document.getElementById('edit-variant-modal-overlay').style.display = 'flex';
+}
+
+function closeEditVariantModal() {
+  document.getElementById('edit-variant-modal-overlay').style.display = 'none';
+}
+
+async function submitEditVariant() {
+  const variantId    = document.getElementById('edit-variant-id').value;
+  const menuItemId   = document.getElementById('edit-variant-menu-item-id').value;
+  const restaurantId = document.getElementById('edit-variant-restaurant-id').value;
+  const name         = document.getElementById('edit-v-name').value.trim();
+  const price        = parseFloat(document.getElementById('edit-v-price').value);
+  const available    = document.getElementById('edit-v-available').value === 'true';
+  const managed      = document.getElementById('edit-v-managed').value === 'true';
+  const count        = parseInt(document.getElementById('edit-v-count').value) || 0;
+
+  let valid = true;
+  if (!name) { document.getElementById('err-edit-v-name').textContent = 'Variant name is required'; valid = false; }
+  if (isNaN(price) || price <= 0) { document.getElementById('err-edit-v-price').textContent = 'Price must be greater than 0'; valid = false; }
+  if (!valid) return;
+
+  setLoading('btn-edit-variant-submit', 'spinner-edit-variant', true);
+
+  const payload = {
+    menuItemVariantRequestDTO: {
+      menuVariantName: name,
+      menuVariantPrice: price,
+      menuVariantAvailable: available,
+      inventoryManaged: managed,
+      currentAvailableInventoryCount: count
+    },
+    menuItemId: parseInt(menuItemId),
+    restaurantId: parseInt(restaurantId)
+  };
+
+  try {
+    const res = await fetch(`${BASE_URL}/menuItemVariant/${variantId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    const text = await res.text();
+    if (res.status === 201) {
+      showToast('success', 'Variant Updated! ✅', text);
+      closeEditVariantModal();
+      document.getElementById('form-search-restaurant').dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+    } else {
+      showToast('error', `Error ${res.status}`, text || 'Variant update failed.');
+    }
+  } catch (err) {
+    showToast('error', 'Connection Failed', `Cannot reach backend at ${BASE_URL}.`);
+  } finally {
+    setLoading('btn-edit-variant-submit', 'spinner-edit-variant', false);
   }
 }
 

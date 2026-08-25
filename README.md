@@ -110,11 +110,19 @@ User ───────────────── standalone entity
 
 ### 🍕 Menu Item
 
-| Method | Endpoint      | Description       | Body / Response         |
-|--------|---------------|-------------------|-------------------------|
-| `POST` | `/menuitem`   | Add a menu item   | Req: `MenuItemRequestDTO`   |
+| Method   | Endpoint           | Description          | Body / Response            |
+|----------|--------------------|----------------------|----------------------------|
+| `POST`   | `/menuItem`        | Add a menu item      | Req: `MenuItemRequestDTO`  |
+| `PUT`    | `/menuItem/{id}`   | Update a menu item   | Req: `MenuItemRequestDTO`  |
+| `DELETE` | `/menuItem/{id}`   | Delete a menu item   | Res: `String`              |
 
-> 💡 `POST` endpoints return `HTTP 201 Created` on success. `GET` endpoints return `HTTP 200 OK`.
+### 🏷️ Menu Item Variant
+
+| Method | Endpoint                | Description               | Body / Response                                  |
+|--------|-------------------------|---------------------------|--------------------------------------------------|
+| `PUT`  | `/menuItemVariant/{id}` | Update a menu item variant| Req: `CombineMenuItemAndMenuItemVariantRequestDTO` |
+
+> 💡 `POST` and `PUT` endpoints return `HTTP 201 Created` on success. `GET` and `DELETE` return `HTTP 200 OK`.
 
 ---
 
