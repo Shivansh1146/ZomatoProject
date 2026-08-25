@@ -567,11 +567,13 @@ function renderRestaurantDetails(data) {
     menuItems.forEach(item => {
       const variants = item.menuItemVariantResponseDTOList || [];
       const variantHtml = variants.map(v => 
-        `<span style="display: inline-flex; align-items: center; gap: 4px; background: var(--bg-base); padding: 3px 8px; border-radius: 4px; font-size: 0.75rem; color: var(--text-muted); margin-right: 6px; margin-top: 6px; border: 1px solid var(--border);">
-          <span>${v.menuVariantName} (₹${v.menuVariantPrice}) - ${v.menuVariantAvailable ? 'Available' : 'Unavailable'}</span>
+        `<div style="display: inline-flex; align-items: center; gap: 6px; background: var(--bg-card); padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; color: var(--text-base); margin-right: 8px; margin-top: 8px; border: 1px solid var(--border); box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
+          <span><strong>${v.menuVariantName}</strong> (₹${v.menuVariantPrice}) - <span style="color: ${v.menuVariantAvailable ? 'var(--green)' : 'var(--red)'};">${v.menuVariantAvailable ? 'Available' : 'Unavailable'}</span></span>
           <button type="button" onclick="openEditVariantModal(${v.menuVariantId}, ${item.menuItemId}, ${data.restaurantId || currentViewRestaurantId}, '${v.menuVariantName.replace(/'/g,"\\'")}', ${v.menuVariantPrice}, ${v.menuVariantAvailable})"
-            style="background:none; border:none; cursor:pointer; font-size:0.65rem; padding:0 2px; color:var(--brand);" title="Edit Variant">✏️</button>
-        </span>`
+            style="background: var(--brand-light); border: 1px solid var(--brand); cursor: pointer; font-size: 0.7rem; padding: 2px 8px; border-radius: 4px; color: var(--brand); font-weight: 600; transition: all 0.2s;"
+            onmouseover="this.style.background='var(--brand)';this.style.color='#fff';"
+            onmouseout="this.style.background='var(--brand-light)';this.style.color='var(--brand)';" title="Edit this variant">✏️ Edit Variant</button>
+        </div>`
       ).join('');
 
       const typeDot = item.menuItemType === 'VEG' 
@@ -579,22 +581,28 @@ function renderRestaurantDetails(data) {
         : `<span class="nonveg-dot" style="display: inline-block;"></span>`;
 
       const itemCard = document.createElement('div');
-      itemCard.style.cssText = 'border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px; background: var(--bg-hover);';
+      itemCard.style.cssText = 'border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 14px; background: var(--bg-hover); margin-bottom: 10px;';
       itemCard.innerHTML = `
-        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px;">
           <div style="flex:1;">
-            <div style="font-weight: 600; font-size: 0.9rem; display: flex; align-items: center; gap: 8px; flex-wrap:wrap;">
+            <div style="font-weight: 600; font-size: 0.95rem; display: flex; align-items: center; gap: 8px; flex-wrap:wrap;">
               ${typeDot} ${item.menuItemName} 
               <span style="font-size: 0.65rem; background: var(--brand-light); color: var(--brand); padding: 2px 6px; border-radius: 4px; font-weight: 700; text-transform: uppercase;">${item.menuItemLabel}</span>
             </div>
-            <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">${item.menuItemDescription}</div>
+            <div style="font-size: 0.82rem; color: var(--text-muted); margin-top: 4px;">${item.menuItemDescription}</div>
           </div>
-          <button type="button" onclick="openEditModal(${item.menuItemId}, ${data.restaurantId || currentViewRestaurantId}, '${item.menuItemName.replace(/'/g,"\\'") }', '${item.menuItemDescription.replace(/'/g,"\\'")}', '${item.menuItemType}', '${item.menuItemLabel.replace(/'/g,"\\'")}')"
-            style="margin-left:12px; padding: 4px 10px; font-size:0.75rem; background:transparent; border:1px solid var(--border); border-radius:6px; cursor:pointer; color:var(--text-muted); white-space:nowrap; transition: all 0.2s;"
-            onmouseover="this.style.borderColor='var(--brand)';this.style.color='var(--brand)';"
-            onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-muted)';">✏️ Edit</button>
+          <div style="display: flex; gap: 6px; align-items: center; flex-shrink: 0;">
+            <button type="button" onclick="openEditModal(${item.menuItemId}, ${data.restaurantId || currentViewRestaurantId}, '${item.menuItemName.replace(/'/g,"\\'") }', '${item.menuItemDescription.replace(/'/g,"\\'")}', '${item.menuItemType}', '${item.menuItemLabel.replace(/'/g,"\\'")}')"
+              style="padding: 4px 10px; font-size:0.75rem; background:var(--bg-card); border:1px solid var(--border); border-radius:6px; cursor:pointer; color:var(--text-base); font-weight:500; white-space:nowrap; transition: all 0.2s;"
+              onmouseover="this.style.borderColor='var(--brand)';this.style.color='var(--brand)';"
+              onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-base)';">✏️ Edit Item</button>
+            <button type="button" onclick="deleteMenuItemApi(${item.menuItemId})"
+              style="padding: 4px 10px; font-size:0.75rem; background:var(--bg-card); border:1px solid #fecaca; border-radius:6px; cursor:pointer; color:#dc2626; font-weight:500; white-space:nowrap; transition: all 0.2s;"
+              onmouseover="this.style.background='#dc2626';this.style.color='#fff';"
+              onmouseout="this.style.background='var(--bg-card)';this.style.color='#dc2626';">🗑️ Delete</button>
+          </div>
         </div>
-        <div>${variantHtml}</div>
+        <div style="margin-top: 6px;">${variantHtml}</div>
       `;
       listContainer.appendChild(itemCard);
     });
@@ -755,6 +763,28 @@ async function submitEditVariant() {
     showToast('error', 'Connection Failed', `Cannot reach backend at ${BASE_URL}.`);
   } finally {
     setLoading('btn-edit-variant-submit', 'spinner-edit-variant', false);
+  }
+}
+
+/* ────────────────────────────────────────
+   DELETE MENU ITEM
+   ──────────────────────────────────────── */
+async function deleteMenuItemApi(menuItemId) {
+  if (!confirm('Are you sure you want to delete this menu item?')) return;
+
+  try {
+    const res = await fetch(`${BASE_URL}/menuItem/${menuItemId}`, {
+      method: 'DELETE'
+    });
+    const text = await res.text();
+    if (res.ok) {
+      showToast('success', 'Menu Item Deleted! 🗑️', text);
+      document.getElementById('form-search-restaurant').dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+    } else {
+      showToast('error', `Error ${res.status}`, text || 'Delete failed.');
+    }
+  } catch (err) {
+    showToast('error', 'Connection Failed', `Cannot reach backend at ${BASE_URL}.`);
   }
 }
 
