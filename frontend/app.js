@@ -558,7 +558,7 @@ function renderRestaurantDetails(data) {
   document.getElementById('display-r-location').textContent = address;
 
   const menuItems = data.menuItemResponseDTOList || [];
-  document.getElementById('display-m-count').textContent = menuItems.length;
+  document.getElementById('display-m-count').textContent = `${menuItems.length} items`;
 
   const listContainer = document.getElementById('display-m-list');
   listContainer.innerHTML = '';
@@ -572,44 +572,56 @@ function renderRestaurantDetails(data) {
         const cached = variantStateCache[v.menuVariantId] || {};
         const isManaged = cached.managed !== undefined ? cached.managed : (v.inventoryManaged !== undefined ? v.inventoryManaged : true);
         const stockCount = cached.count !== undefined ? cached.count : (v.currentAvailableInventoryCount || 50);
-        const stockBadge = isManaged ? `<span style="font-size:0.7rem; color:var(--text-muted); margin-left:4px;">📦 Stock: ${stockCount}</span>` : `<span style="font-size:0.7rem; color:var(--text-muted); margin-left:4px;">🚫 No Tracking</span>`;
+        const stockBadge = isManaged ? `<span style="font-size:0.7rem; color:var(--text-muted); margin-left:8px; font-weight:500;">📦 ${stockCount} left</span>` : ``;
 
-        return `<div style="display: inline-flex; align-items: center; gap: 6px; background: var(--bg-card); padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; color: var(--text-base); margin-right: 8px; margin-top: 8px; border: 1px solid var(--border); box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
-          <span><strong>${v.menuVariantName}</strong> (₹${v.menuVariantPrice}) - <span style="color: ${v.menuVariantAvailable ? 'var(--green)' : 'var(--red)'};">${v.menuVariantAvailable ? 'Available' : 'Unavailable'}</span> ${stockBadge}</span>
+        return `<div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; border-bottom: 1px solid var(--border);">
+          <div style="display: flex; flex-direction: column; gap: 4px;">
+            <span style="font-weight: 600; font-size: 0.9rem; color: var(--text-primary);">${v.menuVariantName}</span>
+            <span style="font-size: 0.85rem; color: var(--text-muted); font-weight: 500;">₹${v.menuVariantPrice} ${stockBadge}</span>
+          </div>
           <button type="button" onclick="openEditVariantModal(${v.menuVariantId}, ${item.menuItemId}, ${data.restaurantId || currentViewRestaurantId}, '${v.menuVariantName.replace(/'/g,"\\'")}', ${v.menuVariantPrice}, ${v.menuVariantAvailable}, ${isManaged}, ${stockCount})"
-            style="background: var(--brand-light); border: 1px solid var(--brand); cursor: pointer; font-size: 0.7rem; padding: 2px 8px; border-radius: 4px; color: var(--brand); font-weight: 600; transition: all 0.2s;"
-            onmouseover="this.style.background='var(--brand)';this.style.color='#fff';"
-            onmouseout="this.style.background='var(--brand-light)';this.style.color='var(--brand)';" title="Edit this variant">✏️ Edit Variant</button>
+            style="background: #fff; border: 1px solid var(--border-input); border-radius: 8px; padding: 6px 16px; font-weight: 700; color: var(--brand); font-size: 0.75rem; cursor: pointer; box-shadow: var(--shadow-sm); text-transform: uppercase; transition: all 0.2s;"
+            onmouseover="this.style.background='var(--brand-light)';" onmouseout="this.style.background='#fff';">Edit</button>
         </div>`;
       }).join('');
 
-      const typeDot = item.menuItemType === 'VEG' 
-        ? `<span class="veg-dot" style="display: inline-block;"></span>` 
-        : `<span class="nonveg-dot" style="display: inline-block;"></span>`;
+      const typeSvg = item.menuItemType === 'VEG' 
+        ? `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1E8449" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="4"/><circle cx="12" cy="12" r="5" fill="#1E8449" stroke="none"/></svg>` 
+        : `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E23744" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M12 7l4 8H8z" fill="#E23744" stroke="none"/></svg>`;
+
+      const labelBadge = item.menuItemLabel ? `<span style="background: var(--brand-light); color: var(--brand); padding: 4px 8px; border-radius: 4px; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; display: inline-flex; align-items: center; gap: 4px;"><svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> ${item.menuItemLabel}</span>` : '';
 
       const itemCard = document.createElement('div');
-      itemCard.style.cssText = 'border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 14px; background: var(--bg-hover); margin-bottom: 10px;';
+      itemCard.style.cssText = 'border-bottom: 1px solid var(--border); padding-bottom: 32px; display: flex; flex-direction: column; gap: 16px;';
       itemCard.innerHTML = `
-        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px;">
-          <div style="flex:1;">
-            <div style="font-weight: 600; font-size: 0.95rem; display: flex; align-items: center; gap: 8px; flex-wrap:wrap;">
-              ${typeDot} ${item.menuItemName} 
-              <span style="font-size: 0.65rem; background: var(--brand-light); color: var(--brand); padding: 2px 6px; border-radius: 4px; font-weight: 700; text-transform: uppercase;">${item.menuItemLabel}</span>
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 24px;">
+          <div style="flex: 1;">
+            <div style="margin-bottom: 8px; display: flex; align-items: center; gap: 8px;">
+              ${typeSvg}
+              ${labelBadge}
             </div>
-            <div style="font-size: 0.82rem; color: var(--text-muted); margin-top: 4px;">${item.menuItemDescription}</div>
+            <h4 style="font-size: 1.25rem; font-weight: 700; color: var(--text-primary); margin-bottom: 4px;">${item.menuItemName}</h4>
+            <div style="font-size: 0.95rem; font-weight: 700; color: var(--text-primary); margin-bottom: 12px;">₹${variants.length > 0 ? variants[0].menuVariantPrice : '0'} <span style="font-size:0.75rem; color:var(--text-dim); font-weight:400;">(starts at)</span></div>
+            <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.6; max-width: 480px;">${item.menuItemDescription}</p>
           </div>
-          <div style="display: flex; gap: 6px; align-items: center; flex-shrink: 0;">
-            <button type="button" onclick="openEditModal(${item.menuItemId}, ${data.restaurantId || currentViewRestaurantId}, '${item.menuItemName.replace(/'/g,"\\'") }', '${item.menuItemDescription.replace(/'/g,"\\'")}', '${item.menuItemType}', '${item.menuItemLabel.replace(/'/g,"\\'")}')"
-              style="padding: 4px 10px; font-size:0.75rem; background:var(--bg-card); border:1px solid var(--border); border-radius:6px; cursor:pointer; color:var(--text-base); font-weight:500; white-space:nowrap; transition: all 0.2s;"
-              onmouseover="this.style.borderColor='var(--brand)';this.style.color='var(--brand)';"
-              onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-base)';">✏️ Edit Item</button>
-            <button type="button" onclick="deleteMenuItemApi(${item.menuItemId})"
-              style="padding: 4px 10px; font-size:0.75rem; background:var(--bg-card); border:1px solid #fecaca; border-radius:6px; cursor:pointer; color:#dc2626; font-weight:500; white-space:nowrap; transition: all 0.2s;"
-              onmouseover="this.style.background='#dc2626';this.style.color='#fff';"
-              onmouseout="this.style.background='var(--bg-card)';this.style.color='#dc2626';">🗑️ Delete</button>
+          <div style="width: 140px; display: flex; flex-direction: column; align-items: center;">
+            <div style="width: 140px; height: 140px; background: var(--bg-hover); border-radius: 16px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.06); position: relative; margin-bottom: 12px;">
+              <img src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=300&q=80" alt="Food" style="width:100%; height:100%; object-fit:cover;" />
+              <div style="position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%);">
+                 <button type="button" onclick="openEditModal(${item.menuItemId}, ${data.restaurantId || currentViewRestaurantId}, '${item.menuItemName.replace(/'/g,"\\'")}', '${item.menuItemDescription.replace(/'/g,"\\'")}', '${item.menuItemType}', '${item.menuItemLabel.replace(/'/g,"\\'")}')" style="background: #fff; color: var(--green); border: 1px solid var(--border-input); font-weight: 800; padding: 6px 24px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); cursor: pointer; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.5px; transition: transform 0.1s;">EDIT</button>
+              </div>
+            </div>
+            <button type="button" onclick="deleteMenuItemApi(${item.menuItemId})" style="background: none; border: none; color: var(--text-dim); font-size: 0.75rem; text-decoration: underline; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='var(--red)'" onmouseout="this.style.color='var(--text-dim)'">Delete Item</button>
           </div>
         </div>
-        <div style="margin-top: 6px;">${variantHtml}</div>
+        ${variants.length > 0 ? `
+        <div style="background: var(--bg-base); border-radius: 12px; border: 1px solid var(--border); overflow: hidden; margin-top: 8px;">
+          <div style="padding: 12px 16px; font-size: 0.8rem; font-weight: 700; color: var(--text-primary); border-bottom: 1px solid var(--border); background: #fbfbfb;">
+            Manage Variants
+          </div>
+          <div>${variantHtml}</div>
+        </div>
+        ` : ''}
       `;
       listContainer.appendChild(itemCard);
     });
