@@ -37,11 +37,12 @@
 
 - 🏪 **Restaurant Management** — Register and manage restaurants with address mapping
 - 🍕 **Menu Item Management** — Add menu items with variants, ratings, and types (VEG/NON-VEG)
-- 🧹 **Soft Delete** — Records are soft-deleted (not permanently removed) using Hibernate's `@SoftDelete`
-- 🕒 **Audit Timestamps** — Automatic creation timestamps on all entities via `@CreationTimestamp`
-- ✅ **Request Validation** — Full input validation using `spring-boot-starter-validation` (mirrored in frontend)
+- 🧹 **Full CRUD & Soft Delete** — Fully functional `DELETE` endpoints for restaurants, menu items, and variants. Records are soft-deleted using Hibernate's `@SoftDelete`
+- 🕒 **Audit Timestamps** — Automatic creation timestamps (`createdAt` / `userAccountCreatedTime`) on all entities via `@CreationTimestamp`, dynamically rendered in the UI.
+- 📦 **Inventory Management** — Track stock limits (`inventoryManaged`, `currentAvailableInventoryCount`) seamlessly through the DTOs to the DB.
+- ✅ **Request Validation & Error Handling** — Full input validation using `spring-boot-starter-validation`. The frontend smartly parses ugly JSON backend errors into clean, responsive UI toasts!
 - 🏛️ **Layered Architecture** — Clean separation between Controller → Service → Repository → Entity layers
-- 🎨 **Admin Panel Frontend** — Includes a stunning, fully-responsive light-theme frontend built with Zomato aesthetics to view dashboards, add restaurants, and manage complex menu items.
+- 🎨 **Admin Panel Frontend** — Includes a stunning, fully-responsive light-theme frontend built with Zomato aesthetics to view dashboards, track inventory, execute CRUD operations, and manage complex menu items.
 
 ---
 
@@ -107,6 +108,7 @@ User ───────────────── standalone entity
 | `POST` | `/restaurant`    | Register a restaurant | Req: `RestaurantRequestDTO`  |
 | `GET`  | `/restaurant`    | Get all restaurants   | Res: `List<RestaurantResponseDTO>` |
 | `GET`  | `/restaurant/{id}`| Get specific restaurant| Res: `RestaurantResponseDTO` |
+| `DELETE`| `/restaurant/{id}`| Delete a restaurant   | Res: `String`              |
 
 ### 🍕 Menu Item
 
@@ -121,6 +123,7 @@ User ───────────────── standalone entity
 | Method | Endpoint                | Description               | Body / Response                                  |
 |--------|-------------------------|---------------------------|--------------------------------------------------|
 | `PUT`  | `/menuItemVariant/{id}` | Update a menu item variant| Req: `CombineMenuItemAndMenuItemVariantRequestDTO` |
+| `DELETE`| `/menuItemVariant/{id}`| Delete a menu item variant| Res: `String`                                    |
 
 > 💡 `POST` and `PUT` endpoints return `HTTP 201 Created` on success. `GET` and `DELETE` return `HTTP 200 OK`.
 

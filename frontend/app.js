@@ -562,6 +562,10 @@ function renderRestaurantDetails(data) {
     .filter(p => p)
     .join(', ');
   document.getElementById('display-r-location').textContent = address;
+  
+  const createdTime = data.userAccountCreatedTime || data.createdAt || data.createdTime;
+  const createdHtml = createdTime ? `<div style="font-size: 0.8rem; color: var(--text-dim); margin-top: 4px;">Created: ${new Date(createdTime).toLocaleString()}</div>` : '';
+  document.getElementById('display-r-location').insertAdjacentHTML('afterend', createdHtml);
 
   const menuItems = data.menuItemResponseDTOList || [];
   document.getElementById('display-m-count').textContent = `${menuItems.length} items`;
@@ -580,10 +584,14 @@ function renderRestaurantDetails(data) {
         const stockCount = cached.count !== undefined ? cached.count : (v.currentAvailableInventoryCount || 50);
         const stockBadge = isManaged ? `<span style="font-size:0.7rem; color:var(--text-muted); margin-left:8px; font-weight:500;">📦 ${stockCount} left</span>` : ``;
 
+        const vCreatedTime = v.userAccountCreatedTime || v.createdAt || v.createdTime;
+        const vCreatedHtml = vCreatedTime ? `<span style="font-size: 0.7rem; color: var(--text-dim); display:block; margin-top:2px;">Added: ${new Date(vCreatedTime).toLocaleDateString()}</span>` : '';
+
         return `<div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; border-bottom: 1px solid var(--border);">
           <div style="display: flex; flex-direction: column; gap: 4px;">
             <span style="font-weight: 600; font-size: 0.9rem; color: var(--text-primary);">${v.menuVariantName}</span>
             <span style="font-size: 0.85rem; color: var(--text-muted); font-weight: 500;">₹${v.menuVariantPrice} ${stockBadge}</span>
+            ${vCreatedHtml}
           </div>
           <button type="button" onclick="openEditVariantModal(${v.menuVariantId}, ${item.menuItemId}, ${data.restaurantId || currentViewRestaurantId}, '${v.menuVariantName.replace(/'/g,"\\'")}', ${v.menuVariantPrice}, ${v.menuVariantAvailable}, ${isManaged}, ${stockCount})"
             style="background: #fff; border: 1px solid var(--border-input); border-radius: 8px; padding: 6px 14px; font-weight: 700; color: var(--brand); font-size: 0.75rem; cursor: pointer; box-shadow: var(--shadow-sm); text-transform: uppercase; transition: all 0.2s;"
@@ -600,6 +608,9 @@ function renderRestaurantDetails(data) {
 
       const labelBadge = item.menuItemLabel ? `<span style="background: var(--brand-light); color: var(--brand); padding: 4px 8px; border-radius: 4px; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; display: inline-flex; align-items: center; gap: 4px;"><svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> ${item.menuItemLabel}</span>` : '';
 
+      const iCreatedTime = item.userAccountCreatedTime || item.createdAt || item.createdTime;
+      const iCreatedHtml = iCreatedTime ? `<div style="font-size: 0.75rem; color: var(--text-dim); margin-top: 8px;">Created: ${new Date(iCreatedTime).toLocaleString()}</div>` : '';
+
       const itemCard = document.createElement('div');
       itemCard.style.cssText = 'border-bottom: 1px solid var(--border); padding-bottom: 32px; display: flex; flex-direction: column; gap: 16px;';
       itemCard.innerHTML = `
@@ -612,6 +623,7 @@ function renderRestaurantDetails(data) {
             <h4 style="font-size: 1.25rem; font-weight: 700; color: var(--text-primary); margin-bottom: 4px;">${item.menuItemName}</h4>
             <div style="font-size: 0.95rem; font-weight: 700; color: var(--text-primary); margin-bottom: 12px;">₹${variants.length > 0 ? variants[0].menuVariantPrice : '0'} <span style="font-size:0.75rem; color:var(--text-dim); font-weight:400;">(starts at)</span></div>
             <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.6; max-width: 480px;">${item.menuItemDescription}</p>
+            ${iCreatedHtml}
           </div>
           <div style="width: 140px; display: flex; flex-direction: column; align-items: center;">
             <div style="width: 140px; height: 140px; background: var(--bg-hover); border-radius: 16px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.06); position: relative; margin-bottom: 12px;">
