@@ -493,6 +493,52 @@
   <!-- TOAST NOTIFICATION -->
   <div class="toast-container" id="toast-container"></div>
 
-  <script src="app.js?v=2"></script>
+  <!-- EDIT MENU ITEM MODAL -->
+  <div id="edit-modal-overlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:1000; align-items:center; justify-content:center;">
+    <div style="background:var(--bg-card); border-radius:16px; padding:32px; width:100%; max-width:480px; margin:16px; box-shadow:0 24px 60px rgba(0,0,0,0.3); animation: slideUp 0.3s ease;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
+        <h2 style="font-size:1.2rem; font-weight:700; color:var(--text-base); margin:0;">✏️ Edit Menu Item</h2>
+        <button onclick="closeEditModal()" style="background:none; border:none; font-size:1.4rem; cursor:pointer; color:var(--text-muted); line-height:1;">&times;</button>
+      </div>
+
+      <input type="hidden" id="edit-menu-item-id" />
+      <input type="hidden" id="edit-restaurant-id" />
+
+      <div class="form-group" style="margin-bottom:14px;">
+        <label for="edit-m-name">Item Name</label>
+        <input type="text" id="edit-m-name" placeholder="e.g. Butter Chicken" autocomplete="off" />
+        <span class="field-error" id="err-edit-m-name"></span>
+      </div>
+      <div class="form-group" style="margin-bottom:14px;">
+        <label for="edit-m-description">Description</label>
+        <input type="text" id="edit-m-description" placeholder="Short description..." autocomplete="off" />
+        <span class="field-error" id="err-edit-m-description"></span>
+      </div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:14px;">
+        <div class="form-group">
+          <label for="edit-m-type">Type</label>
+          <select id="edit-m-type">
+            <option value="VEG">🟢 VEG</option>
+            <option value="NONVEG">🔴 NON-VEG</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="edit-m-label">Label</label>
+          <input type="text" id="edit-m-label" placeholder="e.g. Bestseller" autocomplete="off" />
+          <span class="field-error" id="err-edit-m-label"></span>
+        </div>
+      </div>
+
+      <div style="display:flex; gap:12px; margin-top:24px;">
+        <button type="button" class="btn-secondary" onclick="closeEditModal()" style="flex:1;">Cancel</button>
+        <button type="button" id="btn-edit-submit" onclick="submitEditMenuItem()" class="btn-primary" style="flex:2;">
+          <span class="btn-label">Save Changes</span>
+          <span class="btn-spinner hidden" id="spinner-edit"></span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js?v=3"></script>
 </body>
 </html>

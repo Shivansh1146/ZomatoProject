@@ -580,13 +580,17 @@ function renderRestaurantDetails(data) {
       itemCard.style.cssText = 'border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px; background: var(--bg-hover);';
       itemCard.innerHTML = `
         <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-          <div>
-            <div style="font-weight: 600; font-size: 0.9rem; display: flex; align-items: center; gap: 8px;">
+          <div style="flex:1;">
+            <div style="font-weight: 600; font-size: 0.9rem; display: flex; align-items: center; gap: 8px; flex-wrap:wrap;">
               ${typeDot} ${item.menuItemName} 
               <span style="font-size: 0.65rem; background: var(--brand-light); color: var(--brand); padding: 2px 6px; border-radius: 4px; font-weight: 700; text-transform: uppercase;">${item.menuItemLabel}</span>
             </div>
             <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">${item.menuItemDescription}</div>
           </div>
+          <button type="button" onclick="openEditModal(${item.menuItemId}, ${currentViewRestaurantId}, '${item.menuItemName.replace(/'/g,"\\'") }', '${item.menuItemDescription.replace(/'/g,"\\'")}', '${item.menuItemType}', '${item.menuItemLabel.replace(/'/g,"\\'")}')"
+            style="margin-left:12px; padding: 4px 10px; font-size:0.75rem; background:transparent; border:1px solid var(--border); border-radius:6px; cursor:pointer; color:var(--text-muted); white-space:nowrap; transition: all 0.2s;"
+            onmouseover="this.style.borderColor='var(--brand)';this.style.color='var(--brand)';"
+            onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-muted)';">✏️ Edit</button>
         </div>
         <div>${variantHtml}</div>
       `;
@@ -603,6 +607,80 @@ function navigateToAddMenuItem() {
   }
   showPage('menuitem');
 }
+
+/* ────────────────────────────────────────
+   EDIT MENU ITEM MODAL
+   ──────────────────────────────────────── */
+function openEditModal(menuItemId, restaurantId, name, description, type, label) {
+  document.getElementById('edit-menu-item-id').value = menuItemId;
+  document.getElementById('edit-restaurant-id').value = restaurantId;
+  document.getElementById('edit-m-name').value = name;
+  document.getElementById('edit-m-description').value = description;
+  document.getElementById('edit-m-type').value = type;
+  document.getElementById('edit-m-label').value = label;
+
+  // Clear any previous errors
+  ['err-edit-m-name','err-edit-m-description','err-edit-m-label'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = '';
+  });
+
+  const overlay = document.getElementById('edit-modal-overlay');
+  overlay.style.display = 'flex';
+}
+
+function closeEditModal() {
+  document.getElementById('edit-modal-overlay').style.display = 'none';
+}
+
+async function submitEditMenuItem() {
+  const menuItemId  = document.getElementById('edit-menu-item-id').value;
+  const restaurantId = document.getElementById('edit-restaurant-id').value;
+  const name        = document.getElementById('edit-m-name').value.trim();
+  const description = document.getElementById('edit-m-description').value.trim();
+  const type        = document.getElementById('edit-m-type').value;
+  const label       = document.getElementById('edit-m-label').value.trim();
+
+  // Basic validation
+  let valid = true;
+  if (!name) { document.getElementById('err-edit-m-name').textContent = 'Name is required'; valid = false; }
+  if (!description) { document.getElementById('err-edit-m-description').textContent = 'Description is required'; valid = false; }
+  if (!label) { document.getElementById('err-edit-m-label').textContent = 'Label is required'; valid = false; }
+  if (!valid) return;
+
+  setLoading('btn-edit-submit', 'spinner-edit', true);
+
+  const payload = {
+    menuItemName: name,
+    menuItemDescription: description,
+    menuItemType: type,
+    menuItemLabel: label,
+    restaurantId: parseInt(restaurantId),
+    menuItemVariantRequestDTOList: null,
+  };
+
+  try {
+    const res = await fetch(`${BASE_URL}/menuitem/${menuItemId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    const text = await res.text();
+    if (res.status === 201) {
+      showToast('success', 'Menu Item Updated! ✅', text);
+      closeEditModal();
+      // Refresh the restaurant view to show updated data
+      document.getElementById('form-search-restaurant').dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+    } else {
+      showToast('error', `Error ${res.status}`, text || 'Update failed.');
+    }
+  } catch (err) {
+    showToast('error', 'Connection Failed', `Cannot reach backend at ${BASE_URL}.`);
+  } finally {
+    setLoading('btn-edit-submit', 'spinner-edit', false);
+  }
+}
+
 
 async function fetchAllRestaurants() {
   const tbody = document.getElementById('restaurants-tbody');
