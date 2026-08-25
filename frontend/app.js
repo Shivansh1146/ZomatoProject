@@ -532,7 +532,12 @@ document.getElementById('form-search-restaurant').addEventListener('submit', asy
     const res = await fetch(`${BASE_URL}/restaurant/${id}`);
     
     if (res.ok) {
-      const data = await res.json();
+      const text = await res.text();
+      if (!text.trim()) {
+        showToast('error', 'Not Found', 'Restaurant not found with this ID.');
+        return;
+      }
+      const data = JSON.parse(text);
       currentViewRestaurantId = data.restaurantId || id;
       renderRestaurantDetails(data);
     } else if (res.status === 404) {
@@ -853,8 +858,13 @@ async function fetchAllRestaurants() {
   try {
     const res = await fetch(`${BASE_URL}/restaurant`);
     if (res.ok) {
-      const data = await res.json();
-      renderAllRestaurantsTable(data);
+      const text = await res.text();
+      if (!text.trim()) {
+        renderAllRestaurantsTable([]);
+      } else {
+        const data = JSON.parse(text);
+        renderAllRestaurantsTable(data);
+      }
     } else {
       tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 20px; color: var(--red);">Endpoint GET /restaurant not found or failed (HTTP ${res.status}). You must implement this in Spring Boot!</td></tr>`;
     }
