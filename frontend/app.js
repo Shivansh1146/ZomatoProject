@@ -677,7 +677,7 @@ async function submitEditMenuItem() {
   };
 
   try {
-    const res = await fetch(`${BASE_URL}/menuitem/${menuItemId}`, {
+    const res = await fetch(`${BASE_URL}/menuItem/${menuItemId}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
@@ -692,7 +692,8 @@ async function submitEditMenuItem() {
       showToast('error', `Error ${res.status}`, text || 'Update failed.');
     }
   } catch (err) {
-    showToast('error', 'Connection Failed', `Cannot reach backend at ${BASE_URL}.`);
+    console.error(err);
+    showToast('error', 'Error Occurred', err.message || `Cannot reach backend at ${BASE_URL}.`);
   } finally {
     setLoading('btn-edit-submit', 'spinner-edit', false);
   }
@@ -799,7 +800,8 @@ async function submitEditVariant() {
       showToast('error', `Error ${res.status}`, text || 'Variant update failed.');
     }
   } catch (err) {
-    showToast('error', 'Connection Failed', `Cannot reach backend at ${BASE_URL}.`);
+    console.error(err);
+    showToast('error', 'Error Occurred', err.message || `Cannot reach backend at ${BASE_URL}.`);
   } finally {
     setLoading('btn-edit-variant-submit', 'spinner-edit-variant', false);
   }
@@ -823,7 +825,8 @@ async function deleteMenuItemApi(menuItemId) {
       showToast('error', `Error ${res.status}`, text || 'Delete failed.');
     }
   } catch (err) {
-    showToast('error', 'Connection Failed', `Cannot reach backend at ${BASE_URL}.`);
+    console.error(err);
+    showToast('error', 'Error Occurred', err.message || `Cannot reach backend at ${BASE_URL}.`);
   }
 }
 
