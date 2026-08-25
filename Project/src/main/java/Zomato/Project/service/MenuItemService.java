@@ -10,6 +10,7 @@ import Zomato.Project.repository.RestaurantRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -61,25 +62,47 @@ public class MenuItemService {
         List<MenuItemVariant> menuItemVariantList = new ArrayList<>();
 
         List<MenuItemVariantRequestDTO> menuItemVariantRequestDTOSByUser = menuItemRequestDTO.getMenuItemVariantRequestDTOList();
-       if (menuItemVariantRequestDTOSByUser != null) {
-           for (MenuItemVariantRequestDTO menuItemVariantRequestDTO : menuItemVariantRequestDTOSByUser) {
-               MenuItemVariant menuItemVariant = new MenuItemVariant();
+        if (menuItemVariantRequestDTOSByUser != null) {
+            for (MenuItemVariantRequestDTO menuItemVariantRequestDTO : menuItemVariantRequestDTOSByUser) {
+                MenuItemVariant menuItemVariant = new MenuItemVariant();
 
-               menuItemVariant.setMenuVariantName(menuItemVariantRequestDTO.getMenuVariantName());
-               menuItemVariant.setMenuVariantPrice(menuItemVariantRequestDTO.getMenuVariantPrice());
-               menuItemVariant.setMenuVariantAvailable(menuItemVariantRequestDTO.getMenuVariantAvailable());
-               menuItemVariant.setInventoryManaged(menuItemVariantRequestDTO.getInventoryManaged());
-               if (Boolean.TRUE.equals(menuItemVariantRequestDTO.getInventoryManaged())) {
-                   menuItemVariant.setCurrentAvailableInventoryCount(menuItemVariantRequestDTO.getCurrentAvailableInventoryCount());
-               } else {
-                   menuItemVariant.setCurrentAvailableInventoryCount(0L);
-               }
-               menuItemVariant.setMenuItem(menuItem);
+                menuItemVariant.setMenuVariantName(menuItemVariantRequestDTO.getMenuVariantName());
+                menuItemVariant.setMenuVariantPrice(menuItemVariantRequestDTO.getMenuVariantPrice());
+                menuItemVariant.setMenuVariantAvailable(menuItemVariantRequestDTO.getMenuVariantAvailable());
+                menuItemVariant.setInventoryManaged(menuItemVariantRequestDTO.getInventoryManaged());
+                if (Boolean.TRUE.equals(menuItemVariantRequestDTO.getInventoryManaged())) {
+                    menuItemVariant.setCurrentAvailableInventoryCount(menuItemVariantRequestDTO.getCurrentAvailableInventoryCount());
+                } else {
+                    menuItemVariant.setCurrentAvailableInventoryCount(0L);
+                }
+                menuItemVariant.setMenuItem(menuItem);
 
-               menuItemVariantList.add(menuItemVariant);
-           }
-       }
+                menuItemVariantList.add(menuItemVariant);
+            }
+        }
         menuItem.setMenuItemVariantList(menuItemVariantList);
         return menuItem;
+    }
+
+    public String editMenuItem(Long menuItemId, MenuItemRequestDTO menuItemRequestDTO) {
+        Long restaurantId = menuItemRequestDTO.getRestaurantId();
+
+        Restaurant restaurant = restaurantRepository.findByIdAndMenuItemListId(restaurantId, menuItemId);
+        if (restaurant == null) {
+            return "does not exist";
+        }
+        MenuItem existingMenuItem = menuItemRepository.findById(menuItemId).get();
+
+        existingMenuItem.setMenuItemName(menuItemRequestDTO.getMenuItemName());
+        existingMenuItem.setMenuItemDescription(menuItemRequestDTO.getMenuItemDescription());
+        existingMenuItem.setMenuItemType(menuItemRequestDTO.getMenuItemType());
+        existingMenuItem.setMenuItemLabel(menuItemRequestDTO.getMenuItemLabel());
+
+        menuItemRepository.saveAndFlush(existingMenuItem);
+
+        return "Successfully your Menu item is updated";
+
+
+
     }
 }

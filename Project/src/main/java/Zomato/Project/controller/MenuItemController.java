@@ -22,4 +22,13 @@ public class MenuItemController {
         }
         return ResponseEntity.badRequest().body(response);
     }
+
+    @PutMapping("/{menuItemId}")
+    public ResponseEntity<String> editMenuItem(@Valid @PathVariable Long menuItemId, @RequestBody MenuItemRequestDTO menuItemRequestDTO) {
+        String response = menuItemService.editMenuItem(menuItemId, menuItemRequestDTO);
+        if (response.equals("Successfully your Menu item is updated")) {
+            return ResponseEntity.status(201).body(response);
+        }
+        return ResponseEntity.badRequest().body(response);
+    }
 }
