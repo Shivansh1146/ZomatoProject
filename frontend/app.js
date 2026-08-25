@@ -532,8 +532,8 @@ document.getElementById('form-search-restaurant').addEventListener('submit', asy
     
     if (res.ok) {
       const data = await res.json();
+      currentViewRestaurantId = data.restaurantId || id;
       renderRestaurantDetails(data);
-      currentViewRestaurantId = id;
     } else if (res.status === 404) {
       showToast('error', 'Not Found', 'Restaurant not found with this ID.');
     } else {
@@ -587,7 +587,7 @@ function renderRestaurantDetails(data) {
             </div>
             <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">${item.menuItemDescription}</div>
           </div>
-          <button type="button" onclick="openEditModal(${item.menuItemId}, ${currentViewRestaurantId}, '${item.menuItemName.replace(/'/g,"\\'") }', '${item.menuItemDescription.replace(/'/g,"\\'")}', '${item.menuItemType}', '${item.menuItemLabel.replace(/'/g,"\\'")}')"
+          <button type="button" onclick="openEditModal(${item.menuItemId}, ${data.restaurantId || currentViewRestaurantId}, '${item.menuItemName.replace(/'/g,"\\'") }', '${item.menuItemDescription.replace(/'/g,"\\'")}', '${item.menuItemType}', '${item.menuItemLabel.replace(/'/g,"\\'")}')"
             style="margin-left:12px; padding: 4px 10px; font-size:0.75rem; background:transparent; border:1px solid var(--border); border-radius:6px; cursor:pointer; color:var(--text-muted); white-space:nowrap; transition: all 0.2s;"
             onmouseover="this.style.borderColor='var(--brand)';this.style.color='var(--brand)';"
             onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-muted)';">✏️ Edit</button>
