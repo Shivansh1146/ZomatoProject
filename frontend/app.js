@@ -580,8 +580,11 @@ function renderRestaurantDetails(data) {
             <span style="font-size: 0.85rem; color: var(--text-muted); font-weight: 500;">₹${v.menuVariantPrice} ${stockBadge}</span>
           </div>
           <button type="button" onclick="openEditVariantModal(${v.menuVariantId}, ${item.menuItemId}, ${data.restaurantId || currentViewRestaurantId}, '${v.menuVariantName.replace(/'/g,"\\'")}', ${v.menuVariantPrice}, ${v.menuVariantAvailable}, ${isManaged}, ${stockCount})"
-            style="background: #fff; border: 1px solid var(--border-input); border-radius: 8px; padding: 6px 16px; font-weight: 700; color: var(--brand); font-size: 0.75rem; cursor: pointer; box-shadow: var(--shadow-sm); text-transform: uppercase; transition: all 0.2s;"
+            style="background: #fff; border: 1px solid var(--border-input); border-radius: 8px; padding: 6px 14px; font-weight: 700; color: var(--brand); font-size: 0.75rem; cursor: pointer; box-shadow: var(--shadow-sm); text-transform: uppercase; transition: all 0.2s;"
             onmouseover="this.style.background='var(--brand-light)';" onmouseout="this.style.background='#fff';">Edit</button>
+          <button type="button" onclick="deleteVariantApi(${v.menuVariantId})"
+            style="background: #fff; border: 1px solid #fecaca; border-radius: 8px; padding: 6px 14px; font-weight: 700; color: #dc2626; font-size: 0.75rem; cursor: pointer; box-shadow: var(--shadow-sm); text-transform: uppercase; transition: all 0.2s; margin-left: 6px;"
+            onmouseover="this.style.background='#dc2626';this.style.color='#fff';" onmouseout="this.style.background='#fff';this.style.color='#dc2626';">Delete</button>
         </div>`;
       }).join('');
 
@@ -874,9 +877,13 @@ function renderAllRestaurantsTable(restaurants) {
       <td style="padding: 12px 8px; font-weight: 600; color: var(--text-base);">${r.restaurantName}</td>
       <td style="padding: 12px 8px; color: var(--text-muted);">+91 ${r.restaurantPhoneNumber}</td>
       <td style="padding: 12px 8px; color: var(--text-muted);">${r.state || '-'}, ${r.country || '-'}</td>
-      <td style="padding: 12px 8px; text-align: right;">
-        <button type="button" class="btn-secondary" onclick="viewRestaurantFromTable(${r.restaurantId})" style="padding: 4px 8px; font-size: 0.75rem;">
+      <td style="padding: 12px 8px; text-align: right; display: flex; gap: 6px; justify-content: flex-end; align-items: center;">
+        <button type="button" class="btn-secondary" onclick="viewRestaurantFromTable(${r.restaurantId})" style="padding: 4px 10px; font-size: 0.75rem;">
           View Details
+        </button>
+        <button type="button" onclick="deleteRestaurantApi(${r.restaurantId})" style="padding: 4px 10px; font-size: 0.75rem; background: #fff; border: 1px solid #fecaca; border-radius: 6px; cursor: pointer; color: #dc2626; font-weight: 600; transition: all 0.2s;"
+          onmouseover="this.style.background='#dc2626';this.style.color='#fff';" onmouseout="this.style.background='#fff';this.style.color='#dc2626';">
+          🗑️ Delete
         </button>
       </td>
     </tr>
@@ -887,4 +894,54 @@ function viewRestaurantFromTable(id) {
   document.getElementById('search-r-id').value = id;
   // Trigger form submit
   document.getElementById('form-search-restaurant').dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+}
+
+/* ────────────────────────────────────────
+   DELETE RESTAURANT
+   ──────────────────────────────────────── */
+async function deleteRestaurantApi(restaurantId) {
+  if (!confirm(`Are you sure you want to delete Restaurant #${restaurantId}? This will also delete all its menu items and variants!`)) return;
+
+  try {
+    const res = await fetch(`${BASE_URL}/restaurant/${restaurantId}`, { method: 'DELETE' });
+    const text = await res.text();
+    if (res.ok) {
+      showToast('success', 'Restaurant Deleted! 🗑️', text);
+      // Hide the details card if the deleted restaurant was being viewed
+      if (String(currentViewRestaurantId) === String(restaurantId)) {
+        document.getElementById('restaurant-details-card').classList.add('hidden');
+        currentViewRestaurantId = null;
+      }
+      fetchAllRestaurants();
+    } else {
+      showToast('error', `Error ${res.status}`, text || 'Delete failed.');
+    }
+  } catch (err) {
+    console.error(err);
+    showToast('error', 'Error Occurred', err.message || `Cannot reach backend at ${BASE_URL}.`);
+  }
+}
+
+/* ────────────────────────────────────────
+   DELETE MENU ITEM VARIANT
+   ──────────────────────────────────────── */
+async function deleteVariantApi(variantId) {
+  if (!confirm('Are you sure you want to delete this variant?')) return;
+
+  try {
+    const res = await fetch(`${BASE_URL}/menuItemVariant/${variantId}`, { method: 'DELETE' });
+    const text = await res.text();
+    if (res.ok) {
+      // Remove from cache
+      delete variantStateCache[variantId];
+      showToast('success', 'Variant Deleted! 🗑️', text);
+      // Refresh the current restaurant view
+      document.getElementById('form-search-restaurant').dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+    } else {
+      showToast('error', `Error ${res.status}`, text || 'Delete failed.');
+    }
+  } catch (err) {
+    console.error(err);
+    showToast('error', 'Error Occurred', err.message || `Cannot reach backend at ${BASE_URL}.`);
+  }
 }
