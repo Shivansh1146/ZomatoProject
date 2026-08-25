@@ -8,7 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/menuitem")
+@RequestMapping("/menuItem")
 @CrossOrigin(origins = "*")
 public class MenuItemController {
     @Autowired
@@ -24,11 +24,20 @@ public class MenuItemController {
     }
 
     @PutMapping("/{menuItemId}")
-    public ResponseEntity<String> editMenuItem(@Valid @PathVariable Long menuItemId, @RequestBody MenuItemRequestDTO menuItemRequestDTO) {
+    public ResponseEntity<String> editMenuItem(@PathVariable Long menuItemId, @Valid @RequestBody MenuItemRequestDTO menuItemRequestDTO) {
         String response = menuItemService.editMenuItem(menuItemId, menuItemRequestDTO);
         if (response.equals("Successfully your Menu item is updated")) {
             return ResponseEntity.status(201).body(response);
         }
         return ResponseEntity.badRequest().body(response);
+    }
+
+    @DeleteMapping("/{menuItemId}")
+    public ResponseEntity<String> deleteMenuItem(@PathVariable Long menuItemId) {
+        String response = menuItemService.deleteMenuItem(menuItemId);
+        if (response.equals("Successfully your Menu item is deleted")) {
+            return ResponseEntity.ok(response);
+        }
+        return ResponseEntity.status(404).body(response);
     }
 }

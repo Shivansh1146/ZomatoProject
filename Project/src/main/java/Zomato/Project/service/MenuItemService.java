@@ -103,6 +103,14 @@ public class MenuItemService {
         return "Successfully your Menu item is updated";
 
 
+    }
 
+    public String deleteMenuItem(Long menuItemId) {
+        Optional<MenuItem> menuItem = menuItemRepository.findById(menuItemId);
+        if (menuItem.isEmpty()) {
+            return "menu item does not exist";
+        }
+        menuItemRepository.deleteById(menuItemId);
+        return "Successfully your Menu item is deleted";
     }
 }
