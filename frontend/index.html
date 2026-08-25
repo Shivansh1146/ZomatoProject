@@ -573,7 +573,7 @@
       <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:14px;">
         <div class="form-group">
           <label for="edit-v-managed">Inventory Managed</label>
-          <select id="edit-v-managed">
+          <select id="edit-v-managed" onchange="toggleEditVariantInventory()">
             <option value="true">Yes</option>
             <option value="false">No</option>
           </select>
@@ -581,6 +581,7 @@
         <div class="form-group">
           <label for="edit-v-count">Stock Count</label>
           <input type="number" id="edit-v-count" placeholder="50" min="0" />
+          <span class="field-error" id="err-edit-v-count"></span>
         </div>
       </div>
 
@@ -594,6 +595,6 @@
     </div>
   </div>
 
-  <script src="app.js?v=7"></script>
+  <script src="app.js?v=8"></script>
 </body>
 </html>

@@ -569,7 +569,7 @@ function renderRestaurantDetails(data) {
       const variantHtml = variants.map(v => 
         `<div style="display: inline-flex; align-items: center; gap: 6px; background: var(--bg-card); padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; color: var(--text-base); margin-right: 8px; margin-top: 8px; border: 1px solid var(--border); box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
           <span><strong>${v.menuVariantName}</strong> (₹${v.menuVariantPrice}) - <span style="color: ${v.menuVariantAvailable ? 'var(--green)' : 'var(--red)'};">${v.menuVariantAvailable ? 'Available' : 'Unavailable'}</span></span>
-          <button type="button" onclick="openEditVariantModal(${v.menuVariantId}, ${item.menuItemId}, ${data.restaurantId || currentViewRestaurantId}, '${v.menuVariantName.replace(/'/g,"\\'")}', ${v.menuVariantPrice}, ${v.menuVariantAvailable})"
+          <button type="button" onclick="openEditVariantModal(${v.menuVariantId}, ${item.menuItemId}, ${data.restaurantId || currentViewRestaurantId}, '${v.menuVariantName.replace(/'/g,"\\'")}', ${v.menuVariantPrice}, ${v.menuVariantAvailable}, ${v.inventoryManaged !== false}, ${v.currentAvailableInventoryCount || 50})"
             style="background: var(--brand-light); border: 1px solid var(--brand); cursor: pointer; font-size: 0.7rem; padding: 2px 8px; border-radius: 4px; color: var(--brand); font-weight: 600; transition: all 0.2s;"
             onmouseover="this.style.background='var(--brand)';this.style.color='#fff';"
             onmouseout="this.style.background='var(--brand-light)';this.style.color='var(--brand)';" title="Edit this variant">✏️ Edit Variant</button>
@@ -694,17 +694,37 @@ async function submitEditMenuItem() {
 /* ────────────────────────────────────────
    EDIT MENU ITEM VARIANT MODAL
    ──────────────────────────────────────── */
-function openEditVariantModal(variantId, menuItemId, restaurantId, name, price, available) {
+function toggleEditVariantInventory() {
+  const isManaged = document.getElementById('edit-v-managed').value === 'true';
+  const countInput = document.getElementById('edit-v-count');
+  if (!isManaged) {
+    countInput.value = '0';
+    countInput.disabled = true;
+    countInput.style.opacity = '0.5';
+    countInput.style.cursor = 'not-allowed';
+  } else {
+    countInput.disabled = false;
+    countInput.style.opacity = '1';
+    countInput.style.cursor = 'auto';
+    if (!countInput.value || countInput.value === '0') {
+      countInput.value = '50';
+    }
+  }
+}
+
+function openEditVariantModal(variantId, menuItemId, restaurantId, name, price, available, managed = true, count = 50) {
   document.getElementById('edit-variant-id').value = variantId;
   document.getElementById('edit-variant-menu-item-id').value = menuItemId;
   document.getElementById('edit-variant-restaurant-id').value = restaurantId;
   document.getElementById('edit-v-name').value = name;
   document.getElementById('edit-v-price').value = price;
   document.getElementById('edit-v-available').value = String(available);
-  document.getElementById('edit-v-managed').value = 'true';
-  document.getElementById('edit-v-count').value = '50';
+  document.getElementById('edit-v-managed').value = String(managed);
+  document.getElementById('edit-v-count').value = count;
 
-  ['err-edit-v-name','err-edit-v-price'].forEach(id => {
+  toggleEditVariantInventory();
+
+  ['err-edit-v-name','err-edit-v-price','err-edit-v-count'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.textContent = '';
   });
@@ -724,12 +744,23 @@ async function submitEditVariant() {
   const price        = parseFloat(document.getElementById('edit-v-price').value);
   const available    = document.getElementById('edit-v-available').value === 'true';
   const managed      = document.getElementById('edit-v-managed').value === 'true';
-  const count        = parseInt(document.getElementById('edit-v-count').value) || 0;
+  const countVal     = parseInt(document.getElementById('edit-v-count').value);
+
+  ['err-edit-v-name','err-edit-v-price','err-edit-v-count'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = '';
+  });
 
   let valid = true;
   if (!name) { document.getElementById('err-edit-v-name').textContent = 'Variant name is required'; valid = false; }
   if (isNaN(price) || price <= 0) { document.getElementById('err-edit-v-price').textContent = 'Price must be greater than 0'; valid = false; }
+  if (managed && (isNaN(countVal) || countVal < 0)) {
+    document.getElementById('err-edit-v-count').textContent = 'Stock count cannot be empty or negative when inventory is managed';
+    valid = false;
+  }
   if (!valid) return;
+
+  const count = managed ? countVal : 0;
 
   setLoading('btn-edit-variant-submit', 'spinner-edit-variant', true);
 
