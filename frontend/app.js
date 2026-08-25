@@ -104,7 +104,13 @@ function applyFoodImage(elementId, imageUrl, itemName, gradient) {
       onerror="this.parentElement.style.background='linear-gradient(135deg,#a8e6cf,#dcedc1)';this.remove();" />`;
   } else {
     wrapper.style.background = gradient;
-    wrapper.innerHTML = `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:3rem;">🍽️</div>`;
+    wrapper.innerHTML = `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"></path>
+        <path d="M7 2v20"></path>
+        <path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"></path>
+      </svg>
+    </div>`;
   }
 }
 
@@ -730,8 +736,11 @@ function renderRestaurantDetails(data) {
           </div>
           <div style="width: 140px; display: flex; flex-direction: column; align-items: center; gap: 8px;">
               <div id="food-img-${item.menuItemId}"
-                style="width:140px;height:140px;border-radius:16px;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,0.06);display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#f0f0f0,#e0e0e0);font-size:2rem;">
-                ⏳
+                style="width:140px;height:140px;border-radius:16px;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,0.06);display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#f0f0f0,#e0e0e0);">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="rgba(0,0,0,0.2)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 2v4"></path><path d="M12 18v4"></path><path d="M4.93 4.93l2.83 2.83"></path><path d="M16.24 16.24l2.83 2.83"></path><path d="M2 12h4"></path><path d="M18 12h4"></path><path d="M4.93 19.07l2.83-2.83"></path><path d="M16.24 7.76l2.83-2.83"></path>
+                  <animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" dur="1s" repeatCount="indefinite" />
+                </svg>
               </div>
               <button type="button" onclick="openEditModal(${item.menuItemId}, ${data.restaurantId || currentViewRestaurantId}, '${item.menuItemName.replace(/'/g,`\\'`).replace(/\\/g, `\\\\`)}', '${item.menuItemDescription.replace(/'/g,`\\'`).replace(/\\/g, `\\\\`)}', '${item.menuItemType}', '${item.menuItemLabel.replace(/'/g,`\\'`).replace(/\\/g, `\\\\`)}')" style="background:#fff;color:var(--green);border:1px solid var(--border-input);font-weight:800;padding:6px 20px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.1);cursor:pointer;text-transform:uppercase;font-size:0.8rem;width:100%;">EDIT</button>
               <button type="button" onclick="deleteMenuItemApi(${item.menuItemId})" style="background:none;border:none;color:var(--text-dim);font-size:0.75rem;text-decoration:underline;cursor:pointer;" onmouseover="this.style.color='var(--red)'" onmouseout="this.style.color='var(--text-dim)'">Delete Item</button>
