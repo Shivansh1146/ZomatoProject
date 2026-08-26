@@ -6,91 +6,99 @@
 const BASE_URL = 'http://localhost:9090';
 
 /* ────────────────────────────────────────
-   DYNAMIC FOOD IMAGE SYSTEM
-   Uses TheMealDB (free, no API key) to fetch
-   real food images based on dish name.
+   FOOD IMAGE SYSTEM
+   Priority-ordered category → curated Unsplash photo
+   No external API calls → instant, always correct images
    ──────────────────────────────────────── */
-const foodImageCache = {};
 
-// Map of common keywords → TheMealDB search terms
-const FOOD_KEYWORD_MAP = {
-  'burger':  'burger',     'whopper': 'burger',
-  'pizza':   'pizza',      'margherita': 'pizza',
-  'biryani': 'biryani',   'rice': 'pilaf',
-  'pasta':   'pasta',      'noodle': 'noodles',
-  'paneer':  'paneer',     'tikka': 'tikka',
-  'chicken': 'chicken',   'mutton': 'lamb',
-  'fish':    'fish',       'prawn': 'prawn',
-  'salad':   'salad',      'sandwich': 'sandwich',
-  'sub':     'sandwich',   'wrap': 'wrap',
-  'fries':   'fries',      'coffee': 'coffee',
-  'cake':    'cake',       'ice cream': 'ice cream',
-  'momos':   'dumplings',  'soup': 'soup',
-  'dosa':    'dosa',       'idli': 'idli',
-  'waffle':  'waffle',     'donut': 'doughnut',
-  'croissant':'croissant', 'shake': 'milkshake',
-  'butter':  'butter',     'masala': 'masala',
-  'dal':     'dal',        'curry': 'curry',
-  'steak':   'steak',      'sushi': 'sushi',
-  'tacos':   'taco',       'nachos': 'nachos',
-  'rolls':   'spring rolls','coke': 'cola',
-  'water':   'smoothie',   'juice': 'smoothie',
-  'tea':     'tea',        'latte': 'coffee',
-  'frappuccino': 'coffee', 'cappuccino': 'coffee',
-};
-
-const VEG_GRADIENTS = [
-  'linear-gradient(135deg, #a8e6cf 0%, #dcedc1 100%)',
-  'linear-gradient(135deg, #ffeaa7 0%, #fab1a0 100%)',
-  'linear-gradient(135deg, #fd79a8 0%, #e17055 100%)',
+// Each entry: [keyword_in_item_name, unsplash_url]
+// Listed MOST-SPECIFIC first so "paneer tikka sub" hits "sub" before "paneer"
+const FOOD_IMAGE_MAP = [
+  // Coffee drinks
+  ['frappuccino','https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=300&h=300&fit=crop&q=80'],
+  ['cappuccino', 'https://images.unsplash.com/photo-1572442388796-11668a67e53d?w=300&h=300&fit=crop&q=80'],
+  ['latte',      'https://images.unsplash.com/photo-1561047029-3000c68339ca?w=300&h=300&fit=crop&q=80'],
+  ['espresso',   'https://images.unsplash.com/photo-1510591509098-f4fdc6d0ff04?w=300&h=300&fit=crop&q=80'],
+  ['coffee',     'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=300&h=300&fit=crop&q=80'],
+  ['tea',        'https://images.unsplash.com/photo-1544787219-7f47ccb76574?w=300&h=300&fit=crop&q=80'],
+  // Other beverages
+  ['milkshake',  'https://images.unsplash.com/photo-1572490122747-3968b75cc699?w=300&h=300&fit=crop&q=80'],
+  ['shake',      'https://images.unsplash.com/photo-1572490122747-3968b75cc699?w=300&h=300&fit=crop&q=80'],
+  ['juice',      'https://images.unsplash.com/photo-1600271886742-f049cd451bba?w=300&h=300&fit=crop&q=80'],
+  ['smoothie',   'https://images.unsplash.com/photo-1553530666-ba11a7da3888?w=300&h=300&fit=crop&q=80'],
+  ['coca-cola',  'https://images.unsplash.com/photo-1554866585-cd94860890b7?w=300&h=300&fit=crop&q=80'],
+  ['cola',       'https://images.unsplash.com/photo-1554866585-cd94860890b7?w=300&h=300&fit=crop&q=80'],
+  ['coke',       'https://images.unsplash.com/photo-1554866585-cd94860890b7?w=300&h=300&fit=crop&q=80'],
+  ['mineral water','https://images.unsplash.com/photo-1548839140-29a749e1cf4d?w=300&h=300&fit=crop&q=80'],
+  ['water',      'https://images.unsplash.com/photo-1548839140-29a749e1cf4d?w=300&h=300&fit=crop&q=80'],
+  // Baked / Desserts
+  ['croissant',  'https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=300&h=300&fit=crop&q=80'],
+  ['waffle',     'https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=300&h=300&fit=crop&q=80'],
+  ['donut',      'https://images.unsplash.com/photo-1551024709-8f23befc6f87?w=300&h=300&fit=crop&q=80'],
+  ['doughnut',   'https://images.unsplash.com/photo-1551024709-8f23befc6f87?w=300&h=300&fit=crop&q=80'],
+  ['ice cream',  'https://images.unsplash.com/photo-1570197788417-0e82375c9371?w=300&h=300&fit=crop&q=80'],
+  ['ice-cream',  'https://images.unsplash.com/photo-1570197788417-0e82375c9371?w=300&h=300&fit=crop&q=80'],
+  ['cake',       'https://images.unsplash.com/photo-1571115177098-24ec42ed204d?w=300&h=300&fit=crop&q=80'],
+  ['brownie',    'https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=300&h=300&fit=crop&q=80'],
+  ['muffin',     'https://images.unsplash.com/photo-1558961363-fa8fdf82db35?w=300&h=300&fit=crop&q=80'],
+  ['cookie',     'https://images.unsplash.com/photo-1499636136210-6f4ee915583e?w=300&h=300&fit=crop&q=80'],
+  // Burgers / Fast food — compound names checked first
+  ['whopper',    'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=300&h=300&fit=crop&q=80'],
+  ['burger',     'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=300&h=300&fit=crop&q=80'],
+  ['hot dog',    'https://images.unsplash.com/photo-1617093727343-374698b1b08d?w=300&h=300&fit=crop&q=80'],
+  ['fries',      'https://images.unsplash.com/photo-1576107232684-1279f390859f?w=300&h=300&fit=crop&q=80'],
+  ['tuna sub',   'https://images.unsplash.com/photo-1553909489-cd47e0907980?w=300&h=300&fit=crop&q=80'],
+  ['paneer tikka sub','https://images.unsplash.com/photo-1553909489-cd47e0907980?w=300&h=300&fit=crop&q=80'],
+  ['chicken sub','https://images.unsplash.com/photo-1553909489-cd47e0907980?w=300&h=300&fit=crop&q=80'],
+  ['sub',        'https://images.unsplash.com/photo-1553909489-cd47e0907980?w=300&h=300&fit=crop&q=80'],
+  ['sandwich',   'https://images.unsplash.com/photo-1553909489-cd47e0907980?w=300&h=300&fit=crop&q=80'],
+  ['wrap',       'https://images.unsplash.com/photo-1626700051175-6818013e1d4f?w=300&h=300&fit=crop&q=80'],
+  ['taco',       'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=300&h=300&fit=crop&q=80'],
+  ['nacho',      'https://images.unsplash.com/photo-1582169296194-e4d644c48063?w=300&h=300&fit=crop&q=80'],
+  ['pizza',      'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=300&h=300&fit=crop&q=80'],
+  // Indian — compound names first
+  ['biryani',    'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=300&h=300&fit=crop&q=80'],
+  ['butter chicken','https://images.unsplash.com/photo-1603894584373-5ac82b2ae398?w=300&h=300&fit=crop&q=80'],
+  ['paneer tikka','https://images.unsplash.com/photo-1567188040759-fb8a883dc6d6?w=300&h=300&fit=crop&q=80'],
+  ['chicken tikka','https://images.unsplash.com/photo-1598103442097-8b74394b95c1?w=300&h=300&fit=crop&q=80'],
+  ['tikka masala','https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=300&h=300&fit=crop&q=80'],
+  ['tikka',      'https://images.unsplash.com/photo-1567188040759-fb8a883dc6d6?w=300&h=300&fit=crop&q=80'],
+  ['paneer',     'https://images.unsplash.com/photo-1567188040759-fb8a883dc6d6?w=300&h=300&fit=crop&q=80'],
+  ['dal makhani','https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=300&h=300&fit=crop&q=80'],
+  ['dal',        'https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=300&h=300&fit=crop&q=80'],
+  ['dosa',       'https://images.unsplash.com/photo-1630383249896-424e482df921?w=300&h=300&fit=crop&q=80'],
+  ['idli',       'https://images.unsplash.com/photo-1610900217382-194a432cf9d3?w=300&h=300&fit=crop&q=80'],
+  ['momos',      'https://images.unsplash.com/photo-1563245372-f21724e3856d?w=300&h=300&fit=crop&q=80'],
+  ['naan',       'https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?w=300&h=300&fit=crop&q=80'],
+  ['roti',       'https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?w=300&h=300&fit=crop&q=80'],
+  ['curry',      'https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=300&h=300&fit=crop&q=80'],
+  ['masala',     'https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=300&h=300&fit=crop&q=80'],
+  // International
+  ['pasta',      'https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?w=300&h=300&fit=crop&q=80'],
+  ['noodle',     'https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=300&h=300&fit=crop&q=80'],
+  ['sushi',      'https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=300&h=300&fit=crop&q=80'],
+  ['steak',      'https://images.unsplash.com/photo-1432139555190-58524dae6a55?w=300&h=300&fit=crop&q=80'],
+  ['salad',      'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=300&h=300&fit=crop&q=80'],
+  ['soup',       'https://images.unsplash.com/photo-1547592180-85f173990554?w=300&h=300&fit=crop&q=80'],
+  ['rice',       'https://images.unsplash.com/photo-1601050690597-df0568f70950?w=300&h=300&fit=crop&q=80'],
+  // Proteins
+  ['prawn',      'https://images.unsplash.com/photo-1565014705462-6a61a0edd519?w=300&h=300&fit=crop&q=80'],
+  ['shrimp',     'https://images.unsplash.com/photo-1565014705462-6a61a0edd519?w=300&h=300&fit=crop&q=80'],
+  ['fish',       'https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=300&h=300&fit=crop&q=80'],
+  ['chicken',    'https://images.unsplash.com/photo-1598103442097-8b74394b95c1?w=300&h=300&fit=crop&q=80'],
+  ['mutton',     'https://images.unsplash.com/photo-1603360946369-dc9bb6258143?w=300&h=300&fit=crop&q=80'],
+  ['lamb',       'https://images.unsplash.com/photo-1603360946369-dc9bb6258143?w=300&h=300&fit=crop&q=80'],
 ];
-const NONVEG_GRADIENTS = [
-  'linear-gradient(135deg, #e17055 0%, #d63031 100%)',
-  'linear-gradient(135deg, #fdcb6e 0%, #e17055 100%)',
-  'linear-gradient(135deg, #6c5ce7 0%, #a29bfe 100%)',
-];
 
-async function fetchFoodImage(itemName, itemType, elementId) {
+const VEG_GRADIENTS    = ['linear-gradient(135deg,#a8e6cf,#dcedc1)','linear-gradient(135deg,#ffeaa7,#fab1a0)','linear-gradient(135deg,#55efc4,#00b894)'];
+const NONVEG_GRADIENTS = ['linear-gradient(135deg,#e17055,#d63031)','linear-gradient(135deg,#fdcb6e,#e17055)','linear-gradient(135deg,#6c5ce7,#a29bfe)'];
+
+function getDishImage(itemName) {
   const nameKey = itemName.toLowerCase().trim();
-  const cacheKey = nameKey;
-
-  if (cacheKey in foodImageCache) {
-    applyFoodImage(elementId, foodImageCache[cacheKey], itemName,
-      foodImageCache[cacheKey] ? false : getGradient(itemType, nameKey));
-    return;
+  for (const [keyword, url] of FOOD_IMAGE_MAP) {
+    if (nameKey.includes(keyword)) return url;
   }
-
-  let searchTerm = null;
-  for (const [keyword, term] of Object.entries(FOOD_KEYWORD_MAP)) {
-    if (nameKey.includes(keyword)) { searchTerm = term; break; }
-  }
-  if (!searchTerm) searchTerm = nameKey.split(' ')[0];
-
-  applyFoodImage(elementId, null, itemName, getGradient(itemType, nameKey));
-
-  try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 2500);
-
-    const res = await fetch(
-      `https://www.themealdb.com/api/json/v1/1/search.php?s=${encodeURIComponent(searchTerm)}`,
-      { signal: controller.signal }
-    );
-    clearTimeout(timeoutId);
-
-    const data = await res.json();
-    if (data.meals && data.meals.length > 0) {
-      const imageUrl = data.meals[0].strMealThumb + '/preview';
-      foodImageCache[cacheKey] = imageUrl;
-      applyFoodImage(elementId, imageUrl, itemName, false);
-      return;
-    }
-  } catch (e) { }
-
-  // If TheMealDB fails or has no meals (like drinks), use LoremFlickr dynamic image!
-  const fallbackUrl = `https://loremflickr.com/300/300/${encodeURIComponent(searchTerm)},food/all`;
-  foodImageCache[cacheKey] = fallbackUrl;
-  applyFoodImage(elementId, fallbackUrl, itemName, false);
+  return null;
 }
 
 function getGradient(itemType, nameKey) {
@@ -103,18 +111,29 @@ function applyFoodImage(elementId, imageUrl, itemName, gradient) {
   if (!wrapper) return;
   if (imageUrl) {
     wrapper.innerHTML = `<img src="${imageUrl}" alt="${itemName}"
-      style="width:100%; height:100%; object-fit:cover; border-radius:16px;"
+      style="width:100%;height:100%;object-fit:cover;border-radius:16px;"
       onerror="this.parentElement.style.background='linear-gradient(135deg,#a8e6cf,#dcedc1)';this.remove();" />`;
   } else {
     wrapper.style.background = gradient;
     wrapper.innerHTML = `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;">
-      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"></path>
-        <path d="M7 2v20"></path>
-        <path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"></path>
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/>
+        <path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3v0m0 0v7"/>
       </svg>
     </div>`;
   }
+}
+
+function loadAllFoodImages(menuItems) {
+  menuItems.forEach(item => {
+    const imageUrl = getDishImage(item.menuItemName);
+    applyFoodImage(
+      `food-img-${item.menuItemId}`,
+      imageUrl,
+      item.menuItemName,
+      imageUrl ? false : getGradient(item.menuItemType, item.menuItemName.toLowerCase())
+    );
+  });
 }
 
 /* ────────────────────────────────────────
@@ -764,10 +783,8 @@ function renderRestaurantDetails(data) {
 
   document.getElementById('restaurant-details-card').classList.remove('hidden');
 
-  // After rendering, async-fetch real images for each item from TheMealDB
-  menuItems.forEach(item => {
-    fetchFoodImage(item.menuItemName, item.menuItemType, `food-img-${item.menuItemId}`);
-  });
+  // Load images instantly — no API calls, curated category map
+  loadAllFoodImages(menuItems);
 }
 
 function navigateToAddMenuItem() {
