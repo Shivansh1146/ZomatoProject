@@ -1027,6 +1027,14 @@ async function submitEditVariant() {
         currentAvailableInventoryCount: count,
       };
 
+      const mapVariantToRequest = v => ({
+        menuVariantName: v.menuVariantName,
+        menuVariantPrice: v.menuVariantPrice,
+        menuVariantAvailable: v.menuVariantAvailable,
+        inventoryManaged: v.inventoryManaged,
+        currentAvailableInventoryCount: v.currentAvailableInventoryCount
+      });
+
       const menuItemPayload = {
         menuItemName: context.menuItemName,
         menuItemDescription: context.menuItemDescription,
