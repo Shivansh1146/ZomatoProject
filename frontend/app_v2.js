@@ -1216,6 +1216,89 @@ async function deleteRestaurantApi(restaurantId) {
 }
 
 /* ────────────────────────────────────────
+   USER MANAGEMENT
+   ──────────────────────────────────────── */
+
+function validateUser() {
+  let isValid = true;
+
+  const name = document.getElementById('u-name').value.trim();
+  const email = document.getElementById('u-email').value.trim();
+  const phone = document.getElementById('u-phone').value.trim();
+
+  // Validate Name (only alphabets and spaces)
+  if (!name) {
+    showError('err-u-name', 'User name is required');
+    isValid = false;
+  } else if (!/^[a-zA-Z ]+$/.test(name)) {
+    showError('err-u-name', 'Invalid user name (letters and spaces only)');
+    isValid = false;
+  } else {
+    clearError('err-u-name');
+  }
+
+  // Validate Email
+  if (!email) {
+    showError('err-u-email', 'User email is required');
+    isValid = false;
+  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    showError('err-u-email', 'Invalid email address');
+    isValid = false;
+  } else {
+    clearError('err-u-email');
+  }
+
+  // Validate Phone
+  if (!phone) {
+    showError('err-u-phone', 'Phone number is required');
+    isValid = false;
+  } else if (!/^[6-9][0-9]{9}$/.test(phone)) {
+    showError('err-u-phone', 'Invalid phone number (10 digits starting with 6-9)');
+    isValid = false;
+  } else {
+    clearError('err-u-phone');
+  }
+
+  if (isValid) {
+    submitUser(name, email, phone);
+  }
+}
+
+async function submitUser(name, email, phone) {
+  setLoading('btn-user-submit', 'spinner-user', true);
+
+  const payload = {
+    userName: name,
+    userEmail: email,
+    userPhoneNumber: phone
+  };
+
+  try {
+    const res = await fetch(`${BASE_URL}/user`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const text = await res.text();
+    let errorMsg = text;
+    try { const json = JSON.parse(text); if (json.message || json.error) errorMsg = json.message || json.error; } catch (e) {}
+
+    if (res.status === 201 || res.status === 200) {
+      showToast('success', 'User Created! ✅', text || 'User added successfully.');
+      document.getElementById('form-user').reset();
+    } else {
+      showToast('error', `Error ${res.status}`, errorMsg || 'Failed to create user.');
+    }
+  } catch (err) {
+    console.error(err);
+    showToast('error', 'Error Occurred', err.message || `Cannot reach backend at ${BASE_URL}.`);
+  } finally {
+    setLoading('btn-user-submit', 'spinner-user', false);
+  }
+}
+
+
+/* ────────────────────────────────────────
    DELETE MENU ITEM VARIANT
    ──────────────────────────────────────── */
 async function deleteVariantApi(variantId) {
