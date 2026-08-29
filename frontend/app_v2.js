@@ -648,6 +648,20 @@ document.addEventListener('blur', (e) => {
    ──────────────────────────────────────── */
 let currentViewRestaurantId = null;
 const variantStateCache = {}; // Cache for variant inventory settings (managed & count)
+const menuItemContextCache = {}; // Cache menu item details for add-variant (no backend POST for variants)
+
+function mapVariantToRequest(variant) {
+  const cached = variantStateCache[variant.menuVariantId] || {};
+  const managed = cached.managed !== undefined ? cached.managed : true;
+  const count = cached.count !== undefined ? cached.count : 50;
+  return {
+    menuVariantName: variant.menuVariantName,
+    menuVariantPrice: variant.menuVariantPrice,
+    menuVariantAvailable: variant.menuVariantAvailable,
+    inventoryManaged: managed,
+    currentAvailableInventoryCount: managed ? count : 0,
+  };
+}
 
 document.getElementById('form-search-restaurant').addEventListener('submit', async (e) => {
   e.preventDefault();
@@ -709,6 +723,14 @@ function renderRestaurantDetails(data) {
   } else {
     menuItems.forEach(item => {
       const variants = item.menuItemVariantResponseDTOList || [];
+      menuItemContextCache[item.menuItemId] = {
+        menuItemId: item.menuItemId,
+        menuItemName: item.menuItemName,
+        menuItemDescription: item.menuItemDescription,
+        menuItemType: item.menuItemType,
+        menuItemLabel: item.menuItemLabel,
+        variants,
+      };
       const variantHtml = variants.map(v => {
         const cached = variantStateCache[v.menuVariantId] || {};
         const isManaged = cached.managed !== undefined ? cached.managed : (v.inventoryManaged !== undefined ? v.inventoryManaged : true);
@@ -770,12 +792,20 @@ function renderRestaurantDetails(data) {
         </div>
         ${variants.length > 0 ? `
         <div style="background: var(--bg-base); border-radius: 12px; border: 1px solid var(--border); overflow: hidden; margin-top: 8px;">
-          <div style="padding: 12px 16px; font-size: 0.8rem; font-weight: 700; color: var(--text-primary); border-bottom: 1px solid var(--border); background: #fbfbfb;">
-            Manage Variants
+          <div style="padding: 12px 16px; font-size: 0.8rem; font-weight: 700; color: var(--text-primary); border-bottom: 1px solid var(--border); background: #fbfbfb; display: flex; justify-content: space-between; align-items: center;">
+            <span>Manage Variants</span>
+            <button type="button" onclick="openAddVariantModal(${item.menuItemId}, ${data.restaurantId || currentViewRestaurantId})"
+              style="background: var(--brand-light); border: 1px solid var(--brand); border-radius: 8px; padding: 4px 12px; font-weight: 700; color: var(--brand); font-size: 0.7rem; cursor: pointer; text-transform: uppercase;">+ Add Variant</button>
           </div>
           <div>${variantHtml}</div>
         </div>
-        ` : ''}
+        ` : `
+        <div style="background: var(--bg-base); border-radius: 12px; border: 1px dashed var(--border); padding: 16px; margin-top: 8px; display: flex; justify-content: space-between; align-items: center; gap: 12px;">
+          <span style="font-size: 0.85rem; color: var(--text-muted);">No variants yet — add a price option for this item.</span>
+          <button type="button" onclick="openAddVariantModal(${item.menuItemId}, ${data.restaurantId || currentViewRestaurantId})"
+            style="background: var(--brand); border: none; border-radius: 8px; padding: 8px 16px; font-weight: 700; color: #fff; font-size: 0.75rem; cursor: pointer; text-transform: uppercase; white-space: nowrap;">+ Add Variant</button>
+        </div>
+        `}
       `;
       listContainer.appendChild(itemCard);
     });
@@ -893,6 +923,8 @@ function toggleEditVariantInventory() {
 }
 
 function openEditVariantModal(variantId, menuItemId, restaurantId, name, price, available, managed = true, count = 50) {
+  document.getElementById('edit-variant-modal-title').textContent = '🏷️ Edit Variant';
+  document.getElementById('edit-variant-submit-label').textContent = 'Save Variant';
   document.getElementById('edit-variant-id').value = variantId;
   document.getElementById('edit-variant-menu-item-id').value = menuItemId;
   document.getElementById('edit-variant-restaurant-id').value = restaurantId;
@@ -902,6 +934,27 @@ function openEditVariantModal(variantId, menuItemId, restaurantId, name, price, 
   document.getElementById('edit-v-managed').value = String(managed);
   document.getElementById('edit-v-count').value = count;
 
+  toggleEditVariantInventory();
+
+  ['err-edit-v-name','err-edit-v-price','err-edit-v-count'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = '';
+  });
+
+  document.getElementById('edit-variant-modal-overlay').style.display = 'flex';
+}
+
+function openAddVariantModal(menuItemId, restaurantId) {
+  document.getElementById('edit-variant-modal-title').textContent = '🏷️ Add Variant';
+  document.getElementById('edit-variant-submit-label').textContent = 'Add Variant';
+  document.getElementById('edit-variant-id').value = '';
+  document.getElementById('edit-variant-menu-item-id').value = menuItemId;
+  document.getElementById('edit-variant-restaurant-id').value = restaurantId;
+  document.getElementById('edit-v-name').value = '';
+  document.getElementById('edit-v-price').value = '';
+  document.getElementById('edit-v-available').value = 'true';
+  document.getElementById('edit-v-managed').value = 'true';
+  document.getElementById('edit-v-count').value = '50';
   toggleEditVariantInventory();
 
   ['err-edit-v-name','err-edit-v-price','err-edit-v-count'].forEach(id => {
@@ -957,6 +1010,61 @@ async function submitEditVariant() {
   };
 
   try {
+    const isNewVariant = !variantId;
+
+    if (isNewVariant) {
+      const context = menuItemContextCache[menuItemId];
+      if (!context) {
+        showToast('error', 'Error', 'Menu item data not found. Refresh the page and try again.');
+        return;
+      }
+
+      const newVariant = {
+        menuVariantName: name,
+        menuVariantPrice: price,
+        menuVariantAvailable: available,
+        inventoryManaged: managed,
+        currentAvailableInventoryCount: count,
+      };
+
+      const menuItemPayload = {
+        menuItemName: context.menuItemName,
+        menuItemDescription: context.menuItemDescription,
+        menuItemType: context.menuItemType,
+        menuItemLabel: context.menuItemLabel,
+        restaurantId: parseInt(restaurantId),
+        menuItemVariantRequestDTOList: [
+          ...context.variants.map(mapVariantToRequest),
+          newVariant,
+        ],
+      };
+
+      const delRes = await fetch(`${BASE_URL}/menuItem/${menuItemId}`, { method: 'DELETE' });
+      const delText = await delRes.text();
+      if (!delRes.ok) {
+        showToast('error', `Error ${delRes.status}`, delText || 'Could not update menu item before adding variant.');
+        return;
+      }
+
+      const postRes = await fetch(`${BASE_URL}/menuItem`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(menuItemPayload),
+      });
+      const postText = await postRes.text();
+      let postErrorMsg = postText;
+      try { const json = JSON.parse(postText); if (json.message || json.error) postErrorMsg = json.message || json.error; } catch (e) {}
+
+      if (postRes.status === 201) {
+        showToast('success', 'Variant Added! ✅', postText || 'Variant added successfully.');
+        closeEditVariantModal();
+        document.getElementById('form-search-restaurant').dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+      } else {
+        showToast('error', `Error ${postRes.status}`, postErrorMsg || 'Variant add failed.');
+      }
+      return;
+    }
+
     const res = await fetch(`${BASE_URL}/menuItemVariant/${variantId}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },

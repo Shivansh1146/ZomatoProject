@@ -1,9 +1,7 @@
 package Zomato.Project.controller;
 
 import Zomato.Project.dto.CombineMenuItemAndMenuItemVariantRequestDTO;
-import Zomato.Project.dto.MenuItemRequestDTO;
-import Zomato.Project.dto.MenuItemVariantRequestDTO;
-import Zomato.Project.entity.Restaurant;
+
 import Zomato.Project.service.MenuItemVariantService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;

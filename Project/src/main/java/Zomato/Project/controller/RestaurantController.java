@@ -45,5 +45,14 @@ public class RestaurantController {
         }
         return ResponseEntity.status(404).body(response);
     }
+
+    @PutMapping("/{restaurantId}")
+    public ResponseEntity<String> editRestaurant(@PathVariable Long restaurantId, @Valid @RequestBody RestaurantRequestDTO restaurantRequestDTO) {
+        String response = restaurantService.editRestaurant(restaurantId, restaurantRequestDTO);
+        if (response.equals("Successful Restaurant is updated")) {
+            return ResponseEntity.status(201).body(response);
+        }
+        return ResponseEntity.status(404).body(response);
+    }
 }
 

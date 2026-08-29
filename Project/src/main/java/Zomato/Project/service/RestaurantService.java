@@ -134,4 +134,28 @@ public class RestaurantService {
         restaurantRepository.deleteById(restaurantId);
         return "Successful Restaurant is deleted";
     }
+
+    public String editRestaurant(Long restaurantId, RestaurantRequestDTO restaurantRequestDTO) {
+        Optional<Restaurant> checkRestaurant = restaurantRepository.findById(restaurantId);
+        if (checkRestaurant.isEmpty()) {
+            return "restaurant does not exist ";
+        }
+        Restaurant existingRestaurant = checkRestaurant.get();
+
+        existingRestaurant.setRestaurantName(restaurantRequestDTO.getRestaurantName());
+        existingRestaurant.setRestaurantPhoneNumber(restaurantRequestDTO.getRestaurantPhoneNumber());
+
+        Address existingAddress = existingRestaurant.getRestaurantAddress();
+
+        existingAddress.setStreetLine1(restaurantRequestDTO.getStreetLine1());
+        existingAddress.setStreetLine2(restaurantRequestDTO.getStreetLine2());
+        existingAddress.setPinCode(restaurantRequestDTO.getPinCode());
+        existingAddress.setState(restaurantRequestDTO.getState());
+        existingAddress.setCountry(restaurantRequestDTO.getCountry());
+        existingAddress.setLongitude(restaurantRequestDTO.getLongitude());
+        existingAddress.setLatitude(restaurantRequestDTO.getLatitude());
+
+        restaurantRepository.saveAndFlush(existingRestaurant);
+        return "Successful Restaurant is updated";
+    }
 }

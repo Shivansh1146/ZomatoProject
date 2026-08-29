@@ -548,7 +548,7 @@
   <div id="edit-variant-modal-overlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:1000; align-items:center; justify-content:center;">
     <div style="background:var(--bg-card); border-radius:16px; padding:32px; width:100%; max-width:480px; margin:16px; box-shadow:0 24px 60px rgba(0,0,0,0.3); animation: slideUp 0.3s ease;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
-        <h2 style="font-size:1.2rem; font-weight:700; color:var(--text-base); margin:0;">🏷️ Edit Variant</h2>
+        <h2 id="edit-variant-modal-title" style="font-size:1.2rem; font-weight:700; color:var(--text-base); margin:0;">🏷️ Edit Variant</h2>
         <button onclick="closeEditVariantModal()" style="background:none; border:none; font-size:1.4rem; cursor:pointer; color:var(--text-muted); line-height:1;">&times;</button>
       </div>
 
@@ -593,7 +593,7 @@
       <div style="display:flex; gap:12px; margin-top:24px;">
         <button type="button" class="btn-secondary" onclick="closeEditVariantModal()" style="flex:1;">Cancel</button>
         <button type="button" id="btn-edit-variant-submit" onclick="submitEditVariant()" class="btn-primary" style="flex:2;">
-          <span class="btn-label">Save Variant</span>
+          <span class="btn-label" id="edit-variant-submit-label">Save Variant</span>
           <span class="btn-spinner hidden" id="spinner-edit-variant"></span>
         </button>
       </div>
