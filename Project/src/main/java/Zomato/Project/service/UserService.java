@@ -7,6 +7,8 @@ import Zomato.Project.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -91,4 +93,14 @@ public class UserService {
 
     }
 
+    public List<UserResponseDTO> getAllUser() {
+
+        List<User> userList = userRepository.findAll();
+        List<UserResponseDTO> userResponseDTOList = new ArrayList();
+        for (User Users : userList) {
+
+            userResponseDTOList.add(convertEntityToResponseDTO(Users));
+        }
+        return userResponseDTOList;
+    }
 }
