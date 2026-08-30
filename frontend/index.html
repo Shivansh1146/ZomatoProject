@@ -503,11 +503,12 @@
     <section class="page" id="page-user">
       <div class="page-header" style="margin-top: 24px;">
         <h2 class="page-title">Manage Users</h2>
-        <p class="page-desc">Add new users to the platform.</p>
+        <p class="page-desc">Add and remove users on the Zomato platform.</p>
       </div>
 
+      <!-- Add User Form -->
       <div class="card">
-        <h3 style="margin-top:0; font-size:1.1rem; margin-bottom:16px;">Add New User</h3>
+        <h3 style="margin-top:0; font-size:1.1rem; margin-bottom:16px;">&#10133; Add New User</h3>
         <form id="form-user" onsubmit="event.preventDefault(); validateUser();">
           <div class="form-grid">
             <div class="form-group">
@@ -531,6 +532,53 @@
             <span class="btn-spinner hidden" id="spinner-user"></span>
           </button>
         </form>
+      </div>
+
+      <!-- Session User List -->
+      <div class="card" style="margin-top: 24px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+          <h3 style="margin:0; font-size:1.1rem;">&#128101; Users Created This Session</h3>
+          <span style="font-size:0.75rem; color:var(--text-muted); background:var(--bg-base); border:1px solid var(--border); border-radius:8px; padding:4px 10px;">
+            Clears on page reload
+          </span>
+        </div>
+        <div id="session-users-list">
+          <div id="session-users-empty" style="text-align:center; padding:32px; color:var(--text-muted); font-size:0.9rem;">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin-bottom:8px; opacity:0.4; display:block; margin-left:auto; margin-right:auto;"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            No users added in this session yet. Create one above.
+          </div>
+          <table id="session-users-table" style="display:none; width:100%; border-collapse:collapse; font-size:0.85rem;">
+            <thead>
+              <tr style="background:var(--bg-base); border-bottom:2px solid var(--border);">
+                <th style="padding:10px 14px; text-align:left; font-weight:700; color:var(--text-muted);">ID</th>
+                <th style="padding:10px 14px; text-align:left; font-weight:700; color:var(--text-muted);">Name</th>
+                <th style="padding:10px 14px; text-align:left; font-weight:700; color:var(--text-muted);">Email</th>
+                <th style="padding:10px 14px; text-align:left; font-weight:700; color:var(--text-muted);">Phone</th>
+                <th style="padding:10px 14px; text-align:left; font-weight:700; color:var(--text-muted);">Action</th>
+              </tr>
+            </thead>
+            <tbody id="session-users-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Delete User by ID -->
+      <div class="card" style="margin-top: 24px; border-left: 4px solid var(--red);">
+        <h3 style="margin-top:0; font-size:1.1rem; margin-bottom:6px; color:var(--red);">&#128465;&#65039; Delete User by ID</h3>
+        <p style="font-size:0.85rem; color:var(--text-muted); margin:0 0 16px 0;">
+          Enter any User ID to delete them permanently from the database.
+        </p>
+        <div style="display:flex; gap:12px; align-items:flex-end; flex-wrap:wrap;">
+          <div class="form-group" style="margin:0; flex:1; min-width:160px;">
+            <label class="form-label" for="u-delete-id">User ID <span class="required">*</span></label>
+            <input type="number" id="u-delete-id" class="form-input" placeholder="e.g. 3" min="1" />
+            <div class="error-msg" id="err-u-delete-id"></div>
+          </div>
+          <button type="button" id="btn-delete-user" onclick="deleteUserApi()" style="background:var(--red); color:#fff; border:none; border-radius:10px; padding:11px 22px; font-weight:700; font-size:0.85rem; cursor:pointer; white-space:nowrap; display:flex; align-items:center; gap:8px;">
+            <span id="label-delete-user">Delete User</span>
+            <span class="btn-spinner hidden" id="spinner-delete-user"></span>
+          </button>
+        </div>
       </div>
     </section>
 
