@@ -286,6 +286,46 @@ async function runTests() {
     userPhoneNumber: '1234567890'
   }, true);
 
+  // 22. GET all users
+  let userId = null;
+  const allUsers = await callApi('GET /user — Get all', 'GET', '/user');
+  if (allUsers.ok && Array.isArray(allUsers.data)) {
+    const foundUser = allUsers.data.find(u => u.userEmail === uEmail);
+    if (foundUser) {
+      userId = foundUser.userId;
+      console.log(`   📌 User ID: ${userId}`);
+    }
+  }
+
+  // 23. GET single user
+  if (userId) {
+    await callApi(`GET /user/${userId} — Get by ID`, 'GET', `/user/${userId}`);
+  }
+
+  // 24. PUT update user
+  if (userId) {
+    await callApi(`PUT /user/${userId} — Edit`, 'PUT', `/user/${userId}`, {
+      userName: 'Shivansh Edited',
+      userEmail: uEmail,
+      userPhoneNumber: rPhone()
+    });
+  }
+
+  // 25. PUT update restaurant (Testing the missing endpoint)
+  if (restaurantId) {
+    await callApi(`PUT /restaurant/${restaurantId} — Edit`, 'PUT', `/restaurant/${restaurantId}`, {
+      restaurantName: 'Zomato Test Kitchen Updated',
+      restaurantPhoneNumber: rPhone(), // Use a new phone number to prevent any unique constraint issues
+      streetLine1: 'Plot 42 Sector 18 Updated',
+      streetLine2: 'Landmark',
+      pinCode: '201301',
+      state: 'Uttar Pradesh',
+      country: 'India',
+      latitude: 28.5700,
+      longitude: 77.3200
+    });
+  }
+
   // ────────────────────────────────────────
   // CLEANUP
   // ────────────────────────────────────────
