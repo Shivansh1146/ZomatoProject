@@ -146,11 +146,14 @@ function showPage(page) {
   document.getElementById(`page-${page}`).classList.add('active');
   document.getElementById(`nav-${page}`).classList.add('active');
 
-  const labels = { restaurant: 'Add Restaurant', viewrestaurant: 'View Restaurant', menuitem: 'Add Menu Item' };
+  const labels = { restaurant: 'Add Restaurant', viewrestaurant: 'View Restaurant', menuitem: 'Add Menu Item', user: 'Manage Users' };
   document.getElementById('bc-current').textContent = labels[page];
 
   if (page === 'viewrestaurant') {
     fetchAllRestaurants();
+  }
+  if (page === 'user') {
+    fetchAllUsers();
   }
 }
 
@@ -1219,41 +1222,50 @@ async function deleteRestaurantApi(restaurantId) {
    USER MANAGEMENT
    ──────────────────────────────────────── */
 
-// In-memory session store — cleared on page refresh
-// Structure: { id, name, email, phone }
-const sessionUsers = [];
-
-function renderSessionUsers() {
+async function fetchAllUsers() {
   const empty = document.getElementById('session-users-empty');
   const table = document.getElementById('session-users-table');
   const tbody = document.getElementById('session-users-tbody');
+  
+  // Make sure we have the DOM elements
   if (!empty || !table || !tbody) return;
 
-  if (sessionUsers.length === 0) {
-    empty.style.display = 'block';
-    table.style.display = 'none';
-    return;
+  try {
+    const res = await fetch(`${BASE_URL}/user`);
+    if (res.ok) {
+      const users = await res.json();
+      
+      if (!users || users.length === 0) {
+        empty.style.display = 'block';
+        table.style.display = 'none';
+        return;
+      }
+      
+      empty.style.display = 'none';
+      table.style.display = 'table';
+      
+      tbody.innerHTML = users.map(u => `
+        <tr style="border-bottom:1px solid var(--border); transition:background 0.15s;" onmouseover="this.style.background='var(--bg-base)'" onmouseout="this.style.background=''">
+          <td style="padding:10px 14px; font-weight:700; color:var(--brand);">#${u.userId}</td>
+          <td style="padding:10px 14px; font-weight:600;">${u.userName}</td>
+          <td style="padding:10px 14px; color:var(--text-muted);">${u.userEmail}</td>
+          <td style="padding:10px 14px; color:var(--text-muted);">${u.userPhoneNumber}</td>
+          <td style="padding:10px 14px;">
+            <button onclick="quickDeleteUser('${u.userId}')"
+              style="background:transparent; border:1px solid var(--red); color:var(--red); border-radius:8px; padding:4px 12px; font-size:0.75rem; font-weight:700; cursor:pointer; transition:all 0.2s;"
+              onmouseover="this.style.background='var(--red)';this.style.color='#fff';"
+              onmouseout="this.style.background='transparent';this.style.color='var(--red)';">
+              Delete
+            </button>
+          </td>
+        </tr>
+      `).join('');
+    } else {
+      console.error('Failed to fetch users', await res.text());
+    }
+  } catch (err) {
+    console.error('Error fetching users:', err);
   }
-
-  empty.style.display = 'none';
-  table.style.display = 'table';
-
-  tbody.innerHTML = sessionUsers.map(u => `
-    <tr style="border-bottom:1px solid var(--border); transition:background 0.15s;" onmouseover="this.style.background='var(--bg-base)'" onmouseout="this.style.background=''">
-      <td style="padding:10px 14px; font-weight:700; color:var(--brand);">#${u.id}</td>
-      <td style="padding:10px 14px; font-weight:600;">${u.name}</td>
-      <td style="padding:10px 14px; color:var(--text-muted);">${u.email}</td>
-      <td style="padding:10px 14px; color:var(--text-muted);">${u.phone}</td>
-      <td style="padding:10px 14px;">
-        <button onclick="quickDeleteUser('${u.id}')"
-          style="background:transparent; border:1px solid var(--red); color:var(--red); border-radius:8px; padding:4px 12px; font-size:0.75rem; font-weight:700; cursor:pointer; transition:all 0.2s;"
-          onmouseover="this.style.background='var(--red)';this.style.color='#fff';"
-          onmouseout="this.style.background='transparent';this.style.color='var(--red)';">
-          Delete
-        </button>
-      </td>
-    </tr>
-  `).join('');
 }
 
 function validateUser() {
@@ -1318,13 +1330,11 @@ async function submitUser(name, email, phone) {
     try { const json = JSON.parse(text); if (json.message || json.error) errorMsg = json.message || json.error; } catch (e) {}
 
     if (res.status === 201 || res.status === 200) {
-      // Because your backend does NOT return the generated ID, and there is no GET /user API, 
-      // the frontend has no way of knowing what the ID is!
-      sessionUsers.push({ id: '?', name, email, phone });
-      renderSessionUsers();
-
       showToast('success', 'User Created! ✅', text || 'User added successfully.');
       document.getElementById('form-user').reset();
+      
+      // Refresh the user list from the database
+      fetchAllUsers();
     } else {
       showToast('error', `Error ${res.status}`, errorMsg || 'Failed to create user.');
     }
@@ -1336,13 +1346,8 @@ async function submitUser(name, email, phone) {
   }
 }
 
-// Quick delete from the session table row
+// Quick delete from the user table row
 async function quickDeleteUser(userId) {
-  if (userId === '?' || userId === '?') {
-    alert('Cannot quick-delete! Because your backend doesn\'t have a GET /user API and doesn\'t return the ID upon creation, the exact ID is unknown. Please check your MySQL database to find the actual ID and enter it manually in the delete box below.');
-    document.getElementById('u-delete-id').focus();
-    return;
-  }
   document.getElementById('u-delete-id').value = userId;
   await deleteUserApi();
 }
@@ -1372,10 +1377,8 @@ async function deleteUserApi() {
       showToast('success', 'User Deleted! 🗑️', text || 'User deleted successfully.');
       idInput.value = '';
       
-      // Remove from session list if tracked
-      const idx = sessionUsers.findIndex(u => String(u.id) === String(userId));
-      if (idx !== -1) sessionUsers.splice(idx, 1);
-      renderSessionUsers();
+      // Refresh the user list from the database
+      fetchAllUsers();
       
     } else if (res.status === 404) {
       showToast('error', 'Not Found', errorMsg || 'User not found or already deleted.');

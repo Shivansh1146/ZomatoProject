@@ -537,10 +537,8 @@
       <!-- Session User List -->
       <div class="card" style="margin-top: 24px;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-          <h3 style="margin:0; font-size:1.1rem;">&#128101; Users Created This Session</h3>
-          <span style="font-size:0.75rem; color:var(--text-muted); background:var(--bg-base); border:1px solid var(--border); border-radius:8px; padding:4px 10px;">
-            Clears on page reload
-          </span>
+          <h3 style="margin:0; font-size:1.1rem;">&#128101; All Users</h3>
+          <button onclick="fetchAllUsers()" style="font-size:0.75rem; color:var(--brand); background:var(--bg-base); border:1px solid var(--border); border-radius:8px; padding:4px 12px; cursor:pointer; font-weight:600;">&#8635; Refresh</button>
         </div>
         <div id="session-users-list">
           <div id="session-users-empty" style="text-align:center; padding:32px; color:var(--text-muted); font-size:0.9rem;">
