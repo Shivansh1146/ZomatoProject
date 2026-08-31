@@ -11,7 +11,8 @@
 </p>
 
 <p align="center">
-  A production-ready, scalable <strong>RESTful backend API</strong> for a food delivery platform — inspired by Zomato.<br/>
+  A production-ready, scalable <strong>RESTful backend API</strong> and <strong>Admin Frontend</strong> for a food delivery platform — inspired by Zomato.<br/>
+  🚀 <strong>Project Status: 100% Completed & Synchronized (Frontend + Backend)</strong><br/>
   Built with <strong>Spring Boot</strong>, <strong>JPA/Hibernate</strong>, and <strong>MySQL</strong> as part of an advanced Java learning project.
 </p>
 
