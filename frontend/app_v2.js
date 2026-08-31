@@ -1219,6 +1219,43 @@ async function deleteRestaurantApi(restaurantId) {
    USER MANAGEMENT
    ──────────────────────────────────────── */
 
+// In-memory session store — cleared on page refresh
+// Structure: { id, name, email, phone }
+const sessionUsers = [];
+
+function renderSessionUsers() {
+  const empty = document.getElementById('session-users-empty');
+  const table = document.getElementById('session-users-table');
+  const tbody = document.getElementById('session-users-tbody');
+  if (!empty || !table || !tbody) return;
+
+  if (sessionUsers.length === 0) {
+    empty.style.display = 'block';
+    table.style.display = 'none';
+    return;
+  }
+
+  empty.style.display = 'none';
+  table.style.display = 'table';
+
+  tbody.innerHTML = sessionUsers.map(u => `
+    <tr style="border-bottom:1px solid var(--border); transition:background 0.15s;" onmouseover="this.style.background='var(--bg-base)'" onmouseout="this.style.background=''">
+      <td style="padding:10px 14px; font-weight:700; color:var(--brand);">#${u.id}</td>
+      <td style="padding:10px 14px; font-weight:600;">${u.name}</td>
+      <td style="padding:10px 14px; color:var(--text-muted);">${u.email}</td>
+      <td style="padding:10px 14px; color:var(--text-muted);">${u.phone}</td>
+      <td style="padding:10px 14px;">
+        <button onclick="quickDeleteUser('${u.id}')"
+          style="background:transparent; border:1px solid var(--red); color:var(--red); border-radius:8px; padding:4px 12px; font-size:0.75rem; font-weight:700; cursor:pointer; transition:all 0.2s;"
+          onmouseover="this.style.background='var(--red)';this.style.color='#fff';"
+          onmouseout="this.style.background='transparent';this.style.color='var(--red)';">
+          Delete
+        </button>
+      </td>
+    </tr>
+  `).join('');
+}
+
 function validateUser() {
   let isValid = true;
 
@@ -1226,7 +1263,6 @@ function validateUser() {
   const email = document.getElementById('u-email').value.trim();
   const phone = document.getElementById('u-phone').value.trim();
 
-  // Validate Name (only alphabets and spaces)
   if (!name) {
     showError('err-u-name', 'User name is required');
     isValid = false;
@@ -1237,7 +1273,6 @@ function validateUser() {
     clearError('err-u-name');
   }
 
-  // Validate Email
   if (!email) {
     showError('err-u-email', 'User email is required');
     isValid = false;
@@ -1248,7 +1283,6 @@ function validateUser() {
     clearError('err-u-email');
   }
 
-  // Validate Phone
   if (!phone) {
     showError('err-u-phone', 'Phone number is required');
     isValid = false;
@@ -1284,6 +1318,11 @@ async function submitUser(name, email, phone) {
     try { const json = JSON.parse(text); if (json.message || json.error) errorMsg = json.message || json.error; } catch (e) {}
 
     if (res.status === 201 || res.status === 200) {
+      // Because your backend does NOT return the generated ID, and there is no GET /user API, 
+      // the frontend has no way of knowing what the ID is!
+      sessionUsers.push({ id: '?', name, email, phone });
+      renderSessionUsers();
+
       showToast('success', 'User Created! ✅', text || 'User added successfully.');
       document.getElementById('form-user').reset();
     } else {
@@ -1297,6 +1336,60 @@ async function submitUser(name, email, phone) {
   }
 }
 
+// Quick delete from the session table row
+async function quickDeleteUser(userId) {
+  if (userId === '?' || userId === '?') {
+    alert('Cannot quick-delete! Because your backend doesn\'t have a GET /user API and doesn\'t return the ID upon creation, the exact ID is unknown. Please check your MySQL database to find the actual ID and enter it manually in the delete box below.');
+    document.getElementById('u-delete-id').focus();
+    return;
+  }
+  document.getElementById('u-delete-id').value = userId;
+  await deleteUserApi();
+}
+
+async function deleteUserApi() {
+  const idInput = document.getElementById('u-delete-id');
+  const userId = idInput.value.trim();
+
+  if (!userId || isNaN(userId) || parseInt(userId) < 1) {
+    showError('err-u-delete-id', 'Please enter a valid User ID');
+    return;
+  }
+  clearError('err-u-delete-id');
+
+  if (!confirm(`Delete user with ID ${userId}? This cannot be undone.`)) return;
+
+  setLoading('btn-delete-user', 'spinner-delete-user', true);
+  document.getElementById('label-delete-user').textContent = 'Deleting…';
+
+  try {
+    const res = await fetch(`${BASE_URL}/user/${userId}`, { method: 'DELETE' });
+    const text = await res.text();
+    let errorMsg = text;
+    try { const json = JSON.parse(text); if (json.message || json.error) errorMsg = json.message || json.error; } catch (e) {}
+
+    if (res.ok) {
+      showToast('success', 'User Deleted! 🗑️', text || 'User deleted successfully.');
+      idInput.value = '';
+      
+      // Remove from session list if tracked
+      const idx = sessionUsers.findIndex(u => String(u.id) === String(userId));
+      if (idx !== -1) sessionUsers.splice(idx, 1);
+      renderSessionUsers();
+      
+    } else if (res.status === 404) {
+      showToast('error', 'Not Found', errorMsg || 'User not found or already deleted.');
+    } else {
+      showToast('error', `Error ${res.status}`, errorMsg || 'Delete failed.');
+    }
+  } catch (err) {
+    console.error(err);
+    showToast('error', 'Error Occurred', err.message || `Cannot reach backend at ${BASE_URL}.`);
+  } finally {
+    setLoading('btn-delete-user', 'spinner-delete-user', false);
+    document.getElementById('label-delete-user').textContent = 'Delete User';
+  }
+}
 
 /* ────────────────────────────────────────
    DELETE MENU ITEM VARIANT
