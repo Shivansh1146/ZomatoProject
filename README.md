@@ -126,6 +126,16 @@ User ───────────────── standalone entity
 | `PUT`  | `/menuItemVariant/{id}` | Update a menu item variant| Req: `CombineMenuItemAndMenuItemVariantRequestDTO` |
 | `DELETE`| `/menuItemVariant/{id}`| Delete a menu item variant| Res: `String`                                    |
 
+### 👤 User
+
+| Method | Endpoint         | Description           | Body / Response          |
+|--------|------------------|-----------------------|--------------------------|
+| `POST` | `/user`          | Add a new user        | Req: `UserRequestDTO`    |
+| `GET`  | `/user`          | Get all users         | Res: `List<UserResponseDTO>` |
+| `GET`  | `/user/{id}`     | Get user by ID        | Res: `UserResponseDTO`   |
+| `PUT`  | `/user/{id}`     | Update user details   | Req: `UserRequestDTO`    |
+| `DELETE`| `/user/{id}`     | Delete a user         | Res: `String`              |
+
 > 💡 `POST` and `PUT` endpoints return `HTTP 201 Created` on success. `GET` and `DELETE` return `HTTP 200 OK`.
 
 ---
@@ -139,6 +149,7 @@ User ───────────────── standalone entity
 | Spring Data JPA / Hibernate    | —        | ORM & database interaction           |
 | Spring Web MVC                 | —        | REST API layer                       |
 | Spring Boot Validation         | —        | Request body validation              |
+| SpringDoc OpenAPI / Swagger    | 3.1.0    | API Documentation (Swagger UI)       |
 | MySQL                          | 8.x      | Relational database                  |
 | Lombok                         | 1.18.46  | Boilerplate reduction (getters, etc) |
 | Apache Commons Lang3           | 3.20.0   | Utility library                      |
@@ -193,7 +204,11 @@ spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQL8Dialect
 ```
 The server starts at: **`http://localhost:9090`**
 
-**6. Run the Admin Panel Frontend**
+**6. Access Swagger UI**
+You can interact with the APIs directly via Swagger UI at:
+**`http://localhost:9090/swagger-ui/index.html`**
+
+**7. Run the Admin Panel Frontend**
 Open a new terminal window in the `frontend` folder and start a local HTTP server:
 ```bash
 cd ZomatoProject/frontend
@@ -224,10 +239,10 @@ ZomatoProject/
     │       ├── java/Zomato/Project/
     │       │   ├── controller/
     │       │   │   ├── RestaurantController.java
-    │       │   │   └── MenuItemController.java
+    │       │   │   ├── MenuItemController.java
+    │       │   │   ├── MenuItemVariantController.java
+    │       │   │   └── UserController.java
     │       │   ├── service/
-    │       │   │   ├── RestaurantService.java
-    │       │   │   └── MenuItemService.java
     │       │   ├── repository/
     │       │   ├── entity/
     │       │   │   ├── Base.java
@@ -237,18 +252,15 @@ ZomatoProject/
     │       │   │   ├── Address.java
     │       │   │   └── User.java
     │       │   ├── dto/
-    │       │   │   ├── RestaurantRequestDTO.java
-    │       │   │   └── MenuItemRequestDTO.java
     │       │   ├── enums/
-    │       │   │   └── MenuItemType.java
     │       │   └── ProjectApplication.java
     │       └── resources/
     │           └── application.properties
     └── pom.xml
 frontend/
-└── index.html      # Admin Panel HTML
-└── style.css       # Custom UI styling
-└── app.js          # Logic & API integration
+└── index.html      # Admin Panel HTML (includes styling)
+└── app_v2.js       # Logic & API integration
+└── test_apis.js    # Node.js API test suite
 ```
 
 ---
