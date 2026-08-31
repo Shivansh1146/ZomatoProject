@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Zomato - Order Food Online</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --brand: #E23744;
+      --brand-dark: #C92A36;
+      --bg: #FFFFFF;
+      --bg-alt: #F8F9FA;
+      --text: #1C1C1C;
+      --text-muted: #696969;
+      --border: #E8E8E8;
+      --shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      --veg: #1E8449;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+    body { background-color: var(--bg-alt); color: var(--text); }
+    
+    /* Header */
+    header { background: var(--bg); padding: 16px 5%; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 100; }
+    .logo { font-size: 28px; font-weight: 800; color: var(--brand); font-style: italic; letter-spacing: -1px; }
+    .nav-links a { margin-left: 24px; text-decoration: none; color: var(--text-muted); font-weight: 500; font-size: 1.1rem; }
+    .nav-links a:hover { color: var(--brand); }
+    
+    /* Search Hero */
+    .hero { background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=2070&auto=format&fit=crop'); background-size: cover; background-position: center; height: 350px; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; text-align: center; }
+    .hero h1 { font-size: 3rem; margin-bottom: 24px; font-weight: 800; }
+    .search-bar { width: 60%; max-width: 700px; display: flex; background: white; border-radius: 12px; padding: 8px; box-shadow: var(--shadow); }
+    .search-bar input { flex: 1; border: none; outline: none; padding: 12px 16px; font-size: 1.1rem; border-radius: 8px; }
+    
+    /* Main Content */
+    main { padding: 40px 5%; max-width: 1400px; margin: 0 auto; }
+    .section-title { font-size: 2rem; font-weight: 700; margin-bottom: 24px; color: var(--text); }
+    
+    /* Grid */
+    .restaurant-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 32px; }
+    .restaurant-card { background: var(--bg); border-radius: 16px; overflow: hidden; border: 1px solid var(--border); transition: transform 0.2s, box-shadow 0.2s; cursor: pointer; text-decoration: none; color: inherit; display: block; }
+    .restaurant-card:hover { transform: translateY(-4px); box-shadow: var(--shadow); border-color: transparent; }
+    .r-image { height: 200px; background: #eee; width: 100%; object-fit: cover; }
+    .r-info { padding: 16px; }
+    .r-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+    .r-name { font-size: 1.25rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .r-rating { background: var(--veg); color: white; padding: 4px 8px; border-radius: 6px; font-size: 0.85rem; font-weight: 700; display: flex; align-items: center; gap: 4px; }
+    .r-meta { color: var(--text-muted); font-size: 0.95rem; margin-bottom: 12px; display: flex; justify-content: space-between; }
+    
+    /* Menu Page Overlay */
+    #menu-overlay { position: fixed; inset: 0; background: var(--bg-alt); z-index: 200; overflow-y: auto; display: none; }
+    .menu-header { background: var(--bg); padding: 24px 5%; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 201; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+    .menu-back { background: none; border: none; font-size: 1.1rem; font-weight: 600; color: var(--brand); cursor: pointer; display: flex; align-items: center; gap: 8px; }
+    .menu-back:hover { color: var(--brand-dark); }
+    
+    .menu-content { max-width: 900px; margin: 40px auto; background: var(--bg); padding: 40px; border-radius: 24px; box-shadow: var(--shadow); }
+    .m-r-name { font-size: 2.5rem; font-weight: 800; margin-bottom: 8px; }
+    .m-r-address { color: var(--text-muted); font-size: 1.1rem; margin-bottom: 32px; }
+    
+    /* Menu Items */
+    .menu-item { display: flex; justify-content: space-between; gap: 24px; padding: 32px 0; border-bottom: 1px solid var(--border); }
+    .menu-item:last-child { border-bottom: none; }
+    .mi-details { flex: 1; }
+    .mi-type-icon { width: 20px; height: 20px; margin-bottom: 8px; }
+    .mi-name { font-size: 1.25rem; font-weight: 700; margin-bottom: 8px; }
+    .mi-price { font-size: 1.1rem; font-weight: 600; margin-bottom: 12px; }
+    .mi-desc { color: var(--text-muted); font-size: 0.95rem; line-height: 1.5; }
+    .mi-image-container { position: relative; width: 140px; height: 140px; }
+    .mi-image { width: 100%; height: 100%; border-radius: 16px; object-fit: cover; background: #eee; }
+    .btn-add { position: absolute; bottom: -15px; left: 50%; transform: translateX(-50%); background: white; color: var(--brand); border: 1px solid var(--border); font-weight: 800; font-size: 1.1rem; padding: 8px 24px; border-radius: 8px; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.1); text-transform: uppercase; transition: all 0.2s; }
+    .btn-add:hover { background: var(--bg-alt); }
+    
+    /* Toast */
+    .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px); background: #1C1C1C; color: white; padding: 14px 24px; border-radius: 12px; font-weight: 500; font-size: 1rem; opacity: 0; transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55); z-index: 1000; display: flex; align-items: center; gap: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    
+    .loading { text-align: center; padding: 50px; color: var(--text-muted); font-size: 1.2rem; }
+    
+    /* Empty State */
+    .empty-state { text-align: center; padding: 60px 20px; }
+    .empty-state h3 { font-size: 1.5rem; margin-bottom: 12px; }
+    .empty-state p { color: var(--text-muted); }
+  </style>
+</head>
+<body>
+  
+  <header>
+    <div class="logo">zomato</div>
+    <div class="nav-links">
+      <a href="index.html">Partner Panel</a>
+      <a href="#">Log in</a>
+      <a href="#">Sign up</a>
+    </div>
+  </header>
+
+  <div class="hero">
+    <h1>Discover the best food & drinks</h1>
+    <div class="search-bar">
+      <input type="text" id="search-input" placeholder="Search for restaurant, cuisine or a dish" />
+    </div>
+  </div>
+
+  <main>
+    <h2 class="section-title">Order food online in your area</h2>
+    <div id="loading" class="loading">Finding the best restaurants near you...</div>
+    <div class="restaurant-grid" id="restaurant-grid"></div>
+  </main>
+
+  <!-- Menu View Overlay -->
+  <div id="menu-overlay">
+    <div class="menu-header">
+      <button class="menu-back" onclick="closeMenu()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+        Back to search
+      </button>
+      <div class="logo" style="font-size: 20px;">zomato</div>
+    </div>
+    <div class="menu-content">
+      <div id="m-loading" class="loading" style="display:none;">Loading menu...</div>
+      <div id="menu-data">
+        <h1 class="m-r-name" id="m-name">Restaurant Name</h1>
+        <p class="m-r-address" id="m-address">Address Location</p>
+        <hr style="border:none; border-bottom:1px dashed var(--border); margin-bottom: 32px;" />
+        <div id="menu-items-container"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="consumer.js"></script>
+</body>
+</html>
