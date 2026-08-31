@@ -1172,6 +1172,10 @@ function renderAllRestaurantsTable(restaurants) {
         <button type="button" class="btn-secondary" onclick="viewRestaurantFromTable(${r.restaurantId})" style="padding: 4px 10px; font-size: 0.75rem;">
           View Details
         </button>
+        <button type="button" onclick="openEditRestaurantModal(${r.restaurantId}, '${r.restaurantName}', '${r.restaurantPhoneNumber}', '${r.streetLine1 || ''}', '${r.streetLine2 || ''}', '${r.pinCode || ''}', '${r.state || ''}', '${r.country || ''}', ${r.latitude || 0}, ${r.longitude || 0})" style="padding: 4px 10px; font-size: 0.75rem; background: #fff; border: 1px solid #bfdbfe; border-radius: 6px; cursor: pointer; color: #2563eb; font-weight: 600; transition: all 0.2s;"
+          onmouseover="this.style.background='#2563eb';this.style.color='#fff';" onmouseout="this.style.background='#fff';this.style.color='#2563eb';">
+          ✏️ Edit
+        </button>
         <button type="button" onclick="deleteRestaurantApi(${r.restaurantId})" style="padding: 4px 10px; font-size: 0.75rem; background: #fff; border: 1px solid #fecaca; border-radius: 6px; cursor: pointer; color: #dc2626; font-weight: 600; transition: all 0.2s;"
           onmouseover="this.style.background='#dc2626';this.style.color='#fff';" onmouseout="this.style.background='#fff';this.style.color='#dc2626';">
           🗑️ Delete
@@ -1219,6 +1223,68 @@ async function deleteRestaurantApi(restaurantId) {
 }
 
 /* ────────────────────────────────────────
+   EDIT RESTAURANT  (PUT /restaurant/{id})
+   ──────────────────────────────────────── */
+let _editRestaurantId = null;
+
+function openEditRestaurantModal(id, name, phone, street1, street2, pin, state, country, lat, lng) {
+  _editRestaurantId = id;
+  document.getElementById('er-name').value    = name;
+  document.getElementById('er-phone').value   = phone;
+  document.getElementById('er-street1').value = street1;
+  document.getElementById('er-street2').value = street2;
+  document.getElementById('er-pin').value     = pin;
+  document.getElementById('er-state').value   = state;
+  document.getElementById('er-country').value = country;
+  document.getElementById('er-lat').value     = lat;
+  document.getElementById('er-lng').value     = lng;
+  document.getElementById('edit-restaurant-modal').style.display = 'flex';
+}
+
+function closeEditRestaurantModal() {
+  document.getElementById('edit-restaurant-modal').style.display = 'none';
+  _editRestaurantId = null;
+}
+
+async function submitEditRestaurant() {
+  if (!_editRestaurantId) return;
+
+  const payload = {
+    restaurantName:        document.getElementById('er-name').value.trim(),
+    restaurantPhoneNumber: document.getElementById('er-phone').value.trim(),
+    streetLine1:           document.getElementById('er-street1').value.trim(),
+    streetLine2:           document.getElementById('er-street2').value.trim(),
+    pinCode:               document.getElementById('er-pin').value.trim(),
+    state:                 document.getElementById('er-state').value.trim(),
+    country:               document.getElementById('er-country').value.trim(),
+    latitude:              parseFloat(document.getElementById('er-lat').value),
+    longitude:             parseFloat(document.getElementById('er-lng').value)
+  };
+
+  try {
+    const res = await fetch(`${BASE_URL}/restaurant/${_editRestaurantId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const text = await res.text();
+    let errorMsg = text;
+    try { const json = JSON.parse(text); if (json.message || json.error) errorMsg = json.message || json.error; } catch(e) {}
+
+    if (res.ok || res.status === 201) {
+      showToast('success', 'Restaurant Updated! ✅', text || 'Restaurant updated successfully.');
+      closeEditRestaurantModal();
+      fetchAllRestaurants();
+    } else {
+      showToast('error', `Error ${res.status}`, errorMsg || 'Update failed.');
+    }
+  } catch (err) {
+    console.error(err);
+    showToast('error', 'Error Occurred', err.message);
+  }
+}
+
+/* ────────────────────────────────────────
    USER MANAGEMENT
    ──────────────────────────────────────── */
 
@@ -1250,7 +1316,13 @@ async function fetchAllUsers() {
           <td style="padding:10px 14px; font-weight:600;">${u.userName}</td>
           <td style="padding:10px 14px; color:var(--text-muted);">${u.userEmail}</td>
           <td style="padding:10px 14px; color:var(--text-muted);">${u.userPhoneNumber}</td>
-          <td style="padding:10px 14px;">
+          <td style="padding:10px 14px; display:flex; gap:6px;">
+            <button onclick="openEditUserModal('${u.userId}','${u.userName}','${u.userEmail}','${u.userPhoneNumber}')"
+              style="background:transparent; border:1px solid #bfdbfe; color:#2563eb; border-radius:8px; padding:4px 12px; font-size:0.75rem; font-weight:700; cursor:pointer; transition:all 0.2s;"
+              onmouseover="this.style.background='#2563eb';this.style.color='#fff';"
+              onmouseout="this.style.background='transparent';this.style.color='#2563eb';">
+              ✏️ Edit
+            </button>
             <button onclick="quickDeleteUser('${u.userId}')"
               style="background:transparent; border:1px solid var(--red); color:var(--red); border-radius:8px; padding:4px 12px; font-size:0.75rem; font-weight:700; cursor:pointer; transition:all 0.2s;"
               onmouseover="this.style.background='var(--red)';this.style.color='#fff';"
@@ -1391,6 +1463,58 @@ async function deleteUserApi() {
   } finally {
     setLoading('btn-delete-user', 'spinner-delete-user', false);
     document.getElementById('label-delete-user').textContent = 'Delete User';
+  }
+}
+
+/* ────────────────────────────────────────
+   EDIT USER  (PUT /user/{userId})
+   ──────────────────────────────────────── */
+let _editUserId = null;
+
+function openEditUserModal(id, name, email, phone) {
+  _editUserId = id;
+  document.getElementById('eu-name').value  = name;
+  document.getElementById('eu-email').value = email;
+  document.getElementById('eu-phone').value = phone;
+  document.getElementById('edit-user-modal').style.display = 'flex';
+}
+
+function closeEditUserModal() {
+  document.getElementById('edit-user-modal').style.display = 'none';
+  _editUserId = null;
+}
+
+async function submitEditUser() {
+  if (!_editUserId) return;
+
+  const name  = document.getElementById('eu-name').value.trim();
+  const email = document.getElementById('eu-email').value.trim();
+  const phone = document.getElementById('eu-phone').value.trim();
+
+  if (!name || !/^[a-zA-Z ]+$/.test(name)) { alert('Invalid user name.'); return; }
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { alert('Invalid email.'); return; }
+  if (!phone || !/^[6-9][0-9]{9}$/.test(phone)) { alert('Invalid phone number.'); return; }
+
+  try {
+    const res = await fetch(`${BASE_URL}/user/${_editUserId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userName: name, userEmail: email, userPhoneNumber: phone })
+    });
+    const text = await res.text();
+    let errorMsg = text;
+    try { const json = JSON.parse(text); if (json.message || json.error) errorMsg = json.message || json.error; } catch(e) {}
+
+    if (res.ok || res.status === 201) {
+      showToast('success', 'User Updated! ✅', text || 'User updated successfully.');
+      closeEditUserModal();
+      fetchAllUsers();
+    } else {
+      showToast('error', `Error ${res.status}`, errorMsg || 'Update failed.');
+    }
+  } catch (err) {
+    console.error(err);
+    showToast('error', 'Error Occurred', err.message);
   }
 }
 

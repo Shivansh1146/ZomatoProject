@@ -686,7 +686,53 @@
       </div>
     </div>
   </div>
+  <!-- EDIT RESTAURANT MODAL -->
+  <div id="edit-restaurant-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:1000; align-items:center; justify-content:center;">
+    <div style="background:var(--bg-card); border-radius:16px; padding:32px; width:100%; max-width:480px; margin:16px; box-shadow:0 24px 60px rgba(0,0,0,0.3); animation: slideUp 0.3s ease; max-height:90vh; overflow-y:auto;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
+        <h2 style="font-size:1.2rem; font-weight:700; color:var(--text-base); margin:0;">🏪 Edit Restaurant</h2>
+        <button onclick="closeEditRestaurantModal()" style="background:none; border:none; font-size:1.4rem; cursor:pointer; color:var(--text-muted); line-height:1;">&times;</button>
+      </div>
+      <div class="form-grid">
+        <div class="form-group"><label>Restaurant Name</label><input type="text" id="er-name" /></div>
+        <div class="form-group"><label>Phone Number</label><input type="text" id="er-phone" /></div>
+        <div class="form-group"><label>Street Line 1</label><input type="text" id="er-street1" /></div>
+        <div class="form-group"><label>Street Line 2</label><input type="text" id="er-street2" /></div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
+          <div class="form-group"><label>Pincode</label><input type="text" id="er-pin" /></div>
+          <div class="form-group"><label>State</label><input type="text" id="er-state" /></div>
+        </div>
+        <div class="form-group"><label>Country</label><input type="text" id="er-country" /></div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
+          <div class="form-group"><label>Latitude</label><input type="number" id="er-lat" step="0.000001" /></div>
+          <div class="form-group"><label>Longitude</label><input type="number" id="er-lng" step="0.000001" /></div>
+        </div>
+      </div>
+      <div style="display:flex; gap:12px; margin-top:24px;">
+        <button type="button" class="btn-secondary" onclick="closeEditRestaurantModal()" style="flex:1;">Cancel</button>
+        <button type="button" onclick="submitEditRestaurant()" class="btn-primary" style="flex:2;">Save Changes</button>
+      </div>
+    </div>
+  </div>
 
+  <!-- EDIT USER MODAL -->
+  <div id="edit-user-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:1000; align-items:center; justify-content:center;">
+    <div style="background:var(--bg-card); border-radius:16px; padding:32px; width:100%; max-width:400px; margin:16px; box-shadow:0 24px 60px rgba(0,0,0,0.3); animation: slideUp 0.3s ease;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
+        <h2 style="font-size:1.2rem; font-weight:700; color:var(--text-base); margin:0;">👤 Edit User</h2>
+        <button onclick="closeEditUserModal()" style="background:none; border:none; font-size:1.4rem; cursor:pointer; color:var(--text-muted); line-height:1;">&times;</button>
+      </div>
+      <div class="form-grid">
+        <div class="form-group"><label>Name</label><input type="text" id="eu-name" /></div>
+        <div class="form-group"><label>Email</label><input type="email" id="eu-email" /></div>
+        <div class="form-group"><label>Phone</label><input type="text" id="eu-phone" /></div>
+      </div>
+      <div style="display:flex; gap:12px; margin-top:24px;">
+        <button type="button" class="btn-secondary" onclick="closeEditUserModal()" style="flex:1;">Cancel</button>
+        <button type="button" onclick="submitEditUser()" class="btn-primary" style="flex:2;">Save Changes</button>
+      </div>
+    </div>
+  </div>
   <script src="app_v2.js?v=3"></script>
 </body>
 </html>
