@@ -43,7 +43,8 @@
 - 📦 **Inventory Management** — Track stock limits (`inventoryManaged`, `currentAvailableInventoryCount`) seamlessly through the DTOs to the DB.
 - ✅ **Request Validation & Error Handling** — Full input validation using `spring-boot-starter-validation`. The frontend smartly parses ugly JSON backend errors into clean, responsive UI toasts!
 - 🏛️ **Layered Architecture** — Clean separation between Controller → Service → Repository → Entity layers
-- 🎨 **Admin Panel Frontend** — Includes a stunning, fully-responsive light-theme frontend built with Zomato aesthetics to view dashboards, track inventory, execute CRUD operations, and manage complex menu items.
+- 🎨 **Admin Panel Frontend** — Includes a fully-responsive light-theme frontend built with Zomato aesthetics to view dashboards, track inventory, execute CRUD operations, and manage complex menu items.
+- 🍔 **Consumer-Facing App** — A stunning, real-world customer UI (`consumer.html`) featuring a hero search banner, live filtering (All/Veg/Non-Veg), promotional offer tags, and beautiful slide-up restaurant menus with intelligent food image mapping (using Unsplash photography) synced seamlessly with the backend.
 
 ---
 
@@ -208,13 +209,15 @@ The server starts at: **`http://localhost:9090`**
 You can interact with the APIs directly via Swagger UI at:
 **`http://localhost:9090/swagger-ui/index.html`**
 
-**7. Run the Admin Panel Frontend**
+**7. Run the Frontends**
 Open a new terminal window in the `frontend` folder and start a local HTTP server:
 ```bash
 cd ZomatoProject/frontend
 python -m http.server 3000
 ```
-Then open your browser to **`http://localhost:3000`** to access the Admin Panel.
+Then open your browser to:
+- 🛠️ **Admin Panel:** `http://localhost:3000/index.html`
+- 🍔 **Consumer App:** `http://localhost:3000/consumer.html`
 
 ---
 
@@ -258,8 +261,10 @@ ZomatoProject/
     │           └── application.properties
     └── pom.xml
 frontend/
-└── index.html      # Admin Panel HTML (includes styling)
-└── app_v2.js       # Logic & API integration
+├── index.html      # Admin Panel HTML (includes styling)
+├── app_v2.js       # Admin Panel Logic & API integration
+├── consumer.html   # Real-world Customer App UI
+├── consumer.js     # Customer App Logic & Image mapping
 └── test_apis.js    # Node.js API test suite
 ```
 
