@@ -733,6 +733,71 @@
       </div>
     </div>
   </div>
-  <script src="app_v2.js?v=3"></script>
+  <script src="app_v2.js?v=4"></script>
+
+  <!-- ── ADD ADDRESS MODAL ── -->
+  <div id="add-address-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:1000; align-items:center; justify-content:center; padding:16px;">
+    <div style="background:var(--bg-card); border-radius:20px; padding:32px; width:100%; max-width:520px; box-shadow:0 24px 60px rgba(0,0,0,0.3); animation: slideUp 0.3s ease; max-height:90vh; overflow-y:auto;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
+        <h2 id="add-address-modal-title" style="font-size:1.2rem; font-weight:700; color:var(--text-base); margin:0;">📍 Add Address</h2>
+        <button onclick="closeAddAddressModal()" style="background:none; border:none; font-size:1.4rem; cursor:pointer; color:var(--text-muted); line-height:1;">&times;</button>
+      </div>
+      <form id="form-add-address" onsubmit="event.preventDefault(); submitAddAddress();">
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Street Line 1 <span style="color:var(--red)">*</span></label>
+            <input type="text" id="aa-street1" placeholder="e.g. 12 MG Road" />
+            <span class="form-error" id="err-aa-street1"></span>
+          </div>
+          <div class="form-group">
+            <label>Street Line 2 <span style="color:var(--text-dim); font-weight:400;">(optional)</span></label>
+            <input type="text" id="aa-street2" placeholder="e.g. Near City Mall" />
+          </div>
+          <div class="form-group">
+            <label>Pin Code <span style="color:var(--red)">*</span></label>
+            <input type="text" id="aa-pin" placeholder="e.g. 110001" maxlength="6" />
+            <span class="form-error" id="err-aa-pin"></span>
+          </div>
+          <div class="form-group">
+            <label>State <span style="color:var(--red)">*</span></label>
+            <input type="text" id="aa-state" placeholder="e.g. Delhi" />
+            <span class="form-error" id="err-aa-state"></span>
+          </div>
+          <div class="form-group">
+            <label>Country <span style="color:var(--red)">*</span></label>
+            <input type="text" id="aa-country" placeholder="e.g. India" value="India" />
+            <span class="form-error" id="err-aa-country"></span>
+          </div>
+          <div class="form-group">
+            <label>Latitude <span style="color:var(--red)">*</span></label>
+            <input type="number" id="aa-lat" placeholder="e.g. 28.6139" step="any" />
+            <span class="form-error" id="err-aa-lat"></span>
+          </div>
+          <div class="form-group">
+            <label>Longitude <span style="color:var(--red)">*</span></label>
+            <input type="number" id="aa-lng" placeholder="e.g. 77.2090" step="any" />
+            <span class="form-error" id="err-aa-lng"></span>
+          </div>
+          <div class="form-group">
+            <label>Address Type <span style="color:var(--red)">*</span></label>
+            <input type="text" id="aa-type" placeholder="e.g. Home, Office, Other" />
+            <span class="form-error" id="err-aa-type"></span>
+          </div>
+          <div class="form-group">
+            <label>Set as Default? <span style="color:var(--red)">*</span></label>
+            <select id="aa-default" style="width:100%; padding:10px 14px; border:1px solid var(--border-input); border-radius:10px; font-size:0.95rem; background:var(--bg-base); color:var(--text-base);">
+              <option value="true">Yes — Set as default</option>
+              <option value="false">No — Additional address</option>
+            </select>
+          </div>
+        </div>
+        <div style="display:flex; gap:12px; margin-top:24px;">
+          <button type="button" class="btn-secondary" onclick="closeAddAddressModal()" style="flex:1;">Cancel</button>
+          <button type="submit" id="btn-add-address-submit" class="btn-primary" style="flex:2;">Save Address</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
 </body>
 </html>

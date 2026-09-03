@@ -1264,22 +1264,29 @@ async function fetchAllUsers() {
           <td style="padding:10px 14px; font-weight:600;">${u.userName}</td>
           <td style="padding:10px 14px; color:var(--text-muted);">${u.userEmail}</td>
           <td style="padding:10px 14px; color:var(--text-muted);">${u.userPhoneNumber}</td>
-          <td style="padding:10px 14px; display:flex; gap:6px;">
+          <td style="padding:10px 14px; display:flex; gap:6px; flex-wrap:wrap;">
             <button onclick="openEditUserModal('${u.userId}','${u.userName}','${u.userEmail}','${u.userPhoneNumber}')"
               style="background:transparent; border:1px solid #bfdbfe; color:#2563eb; border-radius:8px; padding:4px 12px; font-size:0.75rem; font-weight:700; cursor:pointer; transition:all 0.2s;"
               onmouseover="this.style.background='#2563eb';this.style.color='#fff';"
               onmouseout="this.style.background='transparent';this.style.color='#2563eb';">
               ✏️ Edit
             </button>
+            <button onclick="openAddAddressModal(${u.userId}, '${u.userName}')"
+              style="background:transparent; border:1px solid #86efac; color:#16a34a; border-radius:8px; padding:4px 12px; font-size:0.75rem; font-weight:700; cursor:pointer; transition:all 0.2s;"
+              onmouseover="this.style.background='#16a34a';this.style.color='#fff';"
+              onmouseout="this.style.background='transparent';this.style.color='#16a34a';">
+              📍 Add Address
+            </button>
             <button onclick="quickDeleteUser('${u.userId}')"
               style="background:transparent; border:1px solid var(--red); color:var(--red); border-radius:8px; padding:4px 12px; font-size:0.75rem; font-weight:700; cursor:pointer; transition:all 0.2s;"
               onmouseover="this.style.background='var(--red)';this.style.color='#fff';"
               onmouseout="this.style.background='transparent';this.style.color='var(--red)';">
-              Delete
+              🗑️ Delete
             </button>
           </td>
         </tr>
       `).join('');
+
     } else {
       console.error('Failed to fetch users', await res.text());
     }
@@ -1439,9 +1446,19 @@ async function submitEditUser() {
   const email = document.getElementById('eu-email').value.trim();
   const phone = document.getElementById('eu-phone').value.trim();
 
-  if (!name || !/^[a-zA-Z ]+$/.test(name)) { alert('Invalid user name.'); return; }
-  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { alert('Invalid email.'); return; }
-  if (!phone || !/^[6-9][0-9]{9}$/.test(phone)) { alert('Invalid phone number.'); return; }
+  // Frontend validation using showToast (consistent with rest of the app)
+  if (!name || !/^[a-zA-Z ]+$/.test(name)) {
+    showToast('error', 'Invalid Name', 'Name must contain only letters and spaces.');
+    return;
+  }
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    showToast('error', 'Invalid Email', 'Please enter a valid email address.');
+    return;
+  }
+  if (!phone || !/^[6-9][0-9]{9}$/.test(phone)) {
+    showToast('error', 'Invalid Phone', 'Phone must be 10 digits starting with 6-9.');
+    return;
+  }
 
   try {
     const res = await fetch(`${BASE_URL}/user/${_editUserId}`, {
@@ -1450,11 +1467,21 @@ async function submitEditUser() {
       body: JSON.stringify({ userName: name, userEmail: email, userPhoneNumber: phone })
     });
     const text = await res.text();
+    // Try to extract a meaningful error from backend JSON
     let errorMsg = text;
-    try { const json = JSON.parse(text); if (json.message || json.error) errorMsg = json.message || json.error; } catch(e) {}
+    try {
+      const json = JSON.parse(text);
+      errorMsg = json.message || json.error || JSON.stringify(json);
+    } catch(e) {}
 
     if (res.ok || res.status === 201) {
-      showToast('success', 'User Updated! ✅', text || 'User updated successfully.');
+      showToast('success', 'User Updated! ✅', 'User details have been saved.');
+      closeEditUserModal();
+      fetchAllUsers();
+    } else if (res.status === 400) {
+      showToast('error', 'Validation Error', errorMsg || 'Check email/phone uniqueness.');
+    } else if (res.status === 404) {
+      showToast('error', 'User Not Found', 'This user may have already been deleted.');
       closeEditUserModal();
       fetchAllUsers();
     } else {
@@ -1462,7 +1489,7 @@ async function submitEditUser() {
     }
   } catch (err) {
     console.error(err);
-    showToast('error', 'Error Occurred', err.message);
+    showToast('error', 'Network Error', err.message || `Cannot reach backend at ${BASE_URL}.`);
   }
 }
 
@@ -1492,5 +1519,123 @@ async function deleteVariantApi(variantId) {
   } catch (err) {
     console.error(err);
     showToast('error', 'Error Occurred', err.message || `Cannot reach backend at ${BASE_URL}.`);
+  }
+}
+
+/* ────────────────────────────────────────
+   ADD ADDRESS TO USER  (POST /address/{userId})
+   ──────────────────────────────────────── */
+let _addressUserId = null;
+
+function openAddAddressModal(userId, userName) {
+  _addressUserId = userId;
+  // Update modal title to show which user
+  document.getElementById('add-address-modal-title').textContent = `📍 Add Address — ${userName}`;
+  // Reset form
+  document.getElementById('form-add-address').reset();
+  // Clear all errors
+  ['aa-street1','aa-pin','aa-state','aa-country','aa-lat','aa-lng','aa-type','aa-default']
+    .forEach(id => clearError('err-' + id));
+  document.getElementById('add-address-modal').style.display = 'flex';
+}
+
+function closeAddAddressModal() {
+  document.getElementById('add-address-modal').style.display = 'none';
+  _addressUserId = null;
+}
+
+async function submitAddAddress() {
+  if (!_addressUserId) return;
+
+  const streetLine1    = document.getElementById('aa-street1').value.trim();
+  const streetLine2    = document.getElementById('aa-street2').value.trim();
+  const pinCode        = document.getElementById('aa-pin').value.trim();
+  const state          = document.getElementById('aa-state').value.trim();
+  const country        = document.getElementById('aa-country').value.trim();
+  const latitude       = parseFloat(document.getElementById('aa-lat').value);
+  const longitude      = parseFloat(document.getElementById('aa-lng').value);
+  const addressType    = document.getElementById('aa-type').value.trim();
+  const defaultAddress = document.getElementById('aa-default').value === 'true';
+
+  // --- Frontend validation mirroring AddressRequestDTO constraints ---
+  let isValid = true;
+
+  if (!streetLine1) {
+    showError('err-aa-street1', 'Street Line 1 is required'); isValid = false;
+  } else { clearError('err-aa-street1'); }
+
+  if (!pinCode || !/^[1-9][0-9]{5}$/.test(pinCode)) {
+    showError('err-aa-pin', 'Invalid pin code (6 digits, not starting with 0)'); isValid = false;
+  } else { clearError('err-aa-pin'); }
+
+  if (!state || !/^[a-zA-Z ]+$/.test(state)) {
+    showError('err-aa-state', 'Invalid state (letters and spaces only)'); isValid = false;
+  } else { clearError('err-aa-state'); }
+
+  if (!country || !/^[a-zA-Z ]+$/.test(country)) {
+    showError('err-aa-country', 'Invalid country (letters and spaces only)'); isValid = false;
+  } else { clearError('err-aa-country'); }
+
+  if (isNaN(latitude) || latitude < -90 || latitude > 90) {
+    showError('err-aa-lat', 'Latitude must be between -90 and 90'); isValid = false;
+  } else { clearError('err-aa-lat'); }
+
+  if (isNaN(longitude) || longitude < -180 || longitude > 180) {
+    showError('err-aa-lng', 'Longitude must be between -180 and 180'); isValid = false;
+  } else { clearError('err-aa-lng'); }
+
+  if (!addressType || !/^[a-zA-Z ]+$/.test(addressType)) {
+    showError('err-aa-type', 'Address type is required (letters and spaces only)'); isValid = false;
+  } else { clearError('err-aa-type'); }
+
+  if (!isValid) return;
+
+  const payload = {
+    streetLine1,
+    streetLine2: streetLine2 || null,
+    pinCode,
+    state,
+    country,
+    latitude,
+    longitude,
+    addressType,
+    defaultAddress
+  };
+
+  const btn = document.getElementById('btn-add-address-submit');
+  btn.disabled = true;
+  btn.textContent = 'Saving…';
+
+  try {
+    const res = await fetch(`${BASE_URL}/address/${_addressUserId}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const text = await res.text();
+    let errorMsg = text;
+    try {
+      const json = JSON.parse(text);
+      errorMsg = json.message || json.error || JSON.stringify(json);
+    } catch (e) {}
+
+    if (res.status === 201 || res.ok) {
+      showToast('success', 'Address Added! 📍', `Address saved for this user.`);
+      closeAddAddressModal();
+    } else if (res.status === 400) {
+      showToast('error', 'Invalid Data', errorMsg || 'Please check all address fields.');
+    } else if (res.status === 404) {
+      showToast('error', 'User Not Found', 'This user may have been deleted.');
+      closeAddAddressModal();
+      fetchAllUsers();
+    } else {
+      showToast('error', `Error ${res.status}`, errorMsg || 'Could not save address.');
+    }
+  } catch (err) {
+    console.error(err);
+    showToast('error', 'Network Error', err.message || `Cannot reach backend at ${BASE_URL}.`);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Save Address';
   }
 }
