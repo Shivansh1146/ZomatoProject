@@ -199,25 +199,37 @@ spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQL8Dialect
 ./mvnw clean install
 ```
 
-**5. Run the backend application**
+**5. Run the Backend Application**
+You can run the backend directly from your IDE (like IntelliJ or Eclipse), or use the terminal:
 ```bash
+# Ensure you are in the Project directory
+cd ZomatoProject/Project
+
+# Run the Spring Boot application
 ./mvnw spring-boot:run
 ```
-The server starts at: **`http://localhost:9090`**
+*(The backend will start and listen on **`http://localhost:9090`**)*
 
 **6. Access Swagger UI**
-You can interact with the APIs directly via Swagger UI at:
-**`http://localhost:9090/swagger-ui/index.html`**
+Once the backend is running, you can interact with the APIs directly via Swagger UI at:
+👉 **`http://localhost:9090/swagger-ui/index.html`**
 
-**7. Run the Frontends**
-Open a new terminal window in the `frontend` folder and start a local HTTP server:
+**7. Run the Frontend Applications (Admin & Consumer)**
+To view the frontends, you must serve the HTML/JS files using a simple HTTP server (this avoids CORS and file:// protocol issues).
+
+Open a **new, separate terminal window**:
 ```bash
+# Navigate to the frontend directory
 cd ZomatoProject/frontend
+
+# Start a local Python HTTP server
 python -m http.server 3000
 ```
-Then open your browser to:
-- 🛠️ **Admin Panel:** `http://localhost:3000/index.html`
-- 🍔 **Consumer App:** `http://localhost:3000/consumer.html`
+
+**8. Open the Apps in your Browser**
+With both the backend and frontend servers running, open your browser and navigate to:
+- 🍔 **Customer App (Ordering):** [http://localhost:3000/consumer.html](http://localhost:3000/consumer.html)
+- 🛠️ **Admin Panel (Management):** [http://localhost:3000/index.html](http://localhost:3000/index.html)
 
 ---
 
