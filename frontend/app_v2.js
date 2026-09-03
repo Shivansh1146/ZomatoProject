@@ -199,10 +199,10 @@ function clearAllErrors(errorIds) {
 function setLoading(btnId, spinnerId, loading) {
   const btn     = document.getElementById(btnId);
   const spinner = document.getElementById(spinnerId);
-  const label   = btn.querySelector('.btn-label');
-  btn.disabled        = loading;
-  spinner.classList.toggle('hidden', !loading);
-  label.style.opacity = loading ? '0.5' : '1';
+  const label   = btn ? btn.querySelector('.btn-label') : null;
+  if (btn) btn.disabled = loading;
+  if (spinner) spinner.classList.toggle('hidden', !loading);
+  if (label) label.style.opacity = loading ? '0.5' : '1';
 }
 
 function resetForm(formId) {
