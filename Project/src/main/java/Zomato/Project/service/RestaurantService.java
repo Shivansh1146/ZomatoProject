@@ -8,6 +8,7 @@ import Zomato.Project.entity.Address;
 import Zomato.Project.entity.MenuItem;
 import Zomato.Project.entity.MenuItemVariant;
 import Zomato.Project.entity.Restaurant;
+import Zomato.Project.exception.RestaurantAlreadyExistException;
 import Zomato.Project.repository.RestaurantRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,15 +22,22 @@ public class RestaurantService {
     @Autowired
     private RestaurantRepository restaurantRepository;
 
-    public String addRestaurant(RestaurantRequestDTO restaurantRequestDTO) {
+    public RestaurantResponseDTO addRestaurant(RestaurantRequestDTO restaurantRequestDTO) {
 
+        validationRestaurantRequestDTO(restaurantRequestDTO);
+        Restaurant restaurant = convertRestaurantDTOToEntity(restaurantRequestDTO);
+
+        restaurant = restaurantRepository.save(restaurant);
+
+        return convertRestaurantToRestaurantResponseDTO(restaurant);
+    }
+
+    private void validationRestaurantRequestDTO(RestaurantRequestDTO restaurantRequestDTO) {
         Optional<Restaurant> existing = restaurantRepository.findByRestaurantPhoneNumber(restaurantRequestDTO.getRestaurantPhoneNumber());
         if (existing.isPresent()) {
-            return "Restaurant Phone number is already exist";
+            throw new RestaurantAlreadyExistException("Phone number is already exist");
         }
-        Restaurant restaurant = convertRestaurantDTOToEntity(restaurantRequestDTO);
-        restaurantRepository.save(restaurant);
-        return "Successful is added your restaurant";
+
     }
 
     private Restaurant convertRestaurantDTOToEntity(RestaurantRequestDTO restaurantRequestDTO) {

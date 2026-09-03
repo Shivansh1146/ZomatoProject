@@ -19,12 +19,13 @@ public class RestaurantController {
     private RestaurantService restaurantService;
 
     @PostMapping
-    public ResponseEntity<String> addRestaurant(@Valid @RequestBody RestaurantRequestDTO restaurantRequestDTO) {
-        String response = restaurantService.addRestaurant(restaurantRequestDTO);
-        if (response.equals("Successful is added your restaurant")) {
-            return ResponseEntity.status(201).body(response);
-        }
-        return ResponseEntity.badRequest().body(response);
+    public ResponseEntity<RestaurantResponseDTO> addRestaurant(@Valid @RequestBody RestaurantRequestDTO restaurantRequestDTO) {
+//        String response = restaurantService.addRestaurant(restaurantRequestDTO);
+//        if (response.equals("Successful is added your restaurant")) {
+//            return ResponseEntity.status(201).body(response);
+//        }
+//        return ResponseEntity.badRequest().body(response);
+        return ResponseEntity.status(201).body(restaurantService.addRestaurant(restaurantRequestDTO));
     }
 
     @GetMapping("/{id}")
