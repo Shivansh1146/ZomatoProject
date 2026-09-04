@@ -314,14 +314,19 @@ document.getElementById('form-restaurant').addEventListener('submit', async (e) 
 
     const text = await res.text();
     let errorMsg = text;
-    try {
-      const json = JSON.parse(text);
-      if (json.message || json.error) errorMsg = json.message || json.error;
-    } catch (e) {}
+    let parsedJson = null;
+    try { parsedJson = JSON.parse(text); errorMsg = parsedJson.message || parsedJson.error || text; } catch (e) {}
 
     if (res.status === 201 || res.ok) {
-      showToast('success', 'Restaurant Added!', text || 'Restaurant registered successfully.');
+      // Backend now returns RestaurantResponseDTO — show the restaurant name
+      const rName = parsedJson && parsedJson.restaurantName ? parsedJson.restaurantName : 'your restaurant';
+      showToast('success', 'Restaurant Added! 🏪', `"${rName}" has been registered successfully.`);
       resetForm('form-restaurant');
+    } else if (res.status === 409) {
+      // AlreadyExistException — phone number duplicate
+      showToast('error', 'Already Exists ⚠️', errorMsg || 'A restaurant with this phone number already exists.');
+    } else if (res.status === 400) {
+      showToast('error', 'Validation Failed', errorMsg || 'Please check all fields and try again.');
     } else {
       showToast('error', `Error ${res.status}`, errorMsg || 'Something went wrong. Check your backend.');
     }
@@ -626,21 +631,24 @@ document.getElementById('form-search-restaurant').addEventListener('submit', asy
 
   try {
     const res = await fetch(`${BASE_URL}/restaurant/${id}`);
-    
+    const text = await res.text();
+    let errorMsg = 'Failed to fetch restaurant details.';
+    let parsedJson = null;
+    try { parsedJson = JSON.parse(text); errorMsg = parsedJson.message || parsedJson.error || errorMsg; } catch (e) {}
+
     if (res.ok) {
-      const text = await res.text();
       if (!text.trim()) {
         showToast('error', 'Not Found', 'Restaurant not found with this ID.');
         return;
       }
-      const data = JSON.parse(text);
-      currentViewRestaurantId = data.restaurantId || id;
-      renderRestaurantDetails(data);
-      showToast('success', 'Found!', `Loaded details for ${data.restaurantName}`);
+      currentViewRestaurantId = parsedJson.restaurantId || id;
+      renderRestaurantDetails(parsedJson);
+      showToast('success', 'Found! ✅', `Loaded details for ${parsedJson.restaurantName}`);
     } else if (res.status === 404) {
-      showToast('error', 'Not Found', 'Restaurant not found with this ID.');
+      // Backend now throws ResourceNotFoundException with JSON body
+      showToast('error', 'Not Found 🔍', errorMsg || 'No restaurant found with this ID.');
     } else {
-      showToast('error', `Error ${res.status}`, 'Failed to fetch restaurant details.');
+      showToast('error', `Error ${res.status}`, errorMsg);
     }
   } catch (err) {
     console.error(err);
@@ -1148,21 +1156,22 @@ async function deleteRestaurantApi(restaurantId) {
   try {
     const res = await fetch(`${BASE_URL}/restaurant/${restaurantId}`, { method: 'DELETE' });
     const text = await res.text();
-    let errorMsg = text;
-    try { const json = JSON.parse(text); if (json.message || json.error) errorMsg = json.message || json.error; } catch (e) {}
+    let errorMsg = 'Delete failed.';
+    try { const json = JSON.parse(text); errorMsg = json.message || json.error || errorMsg; } catch (e) {}
 
     if (res.ok) {
-      showToast('success', 'Restaurant Deleted! 🗑️', text || 'Successfully deleted the restaurant.');
-      // Hide the details card if the deleted restaurant was being viewed
+      showToast('success', 'Restaurant Deleted! 🗑️', 'Restaurant and all its menu items have been removed.');
       if (String(currentViewRestaurantId) === String(restaurantId)) {
         document.getElementById('restaurant-details-card').classList.add('hidden');
         currentViewRestaurantId = null;
       }
       fetchAllRestaurants();
     } else if (res.status === 404) {
-      showToast('error', 'Not Found', 'Restaurant not found or already deleted.');
+      // Backend now throws ResourceNotFoundException with JSON body
+      showToast('error', 'Not Found 🔍', errorMsg || 'Restaurant not found or already deleted.');
+      fetchAllRestaurants();
     } else {
-      showToast('error', `Error ${res.status}`, errorMsg || 'Delete failed.');
+      showToast('error', `Error ${res.status}`, errorMsg);
     }
   } catch (err) {
     console.error(err);
@@ -1216,15 +1225,23 @@ async function submitEditRestaurant() {
       body: JSON.stringify(payload)
     });
     const text = await res.text();
-    let errorMsg = text;
-    try { const json = JSON.parse(text); if (json.message || json.error) errorMsg = json.message || json.error; } catch(e) {}
+    let errorMsg = 'Update failed.';
+    try { const json = JSON.parse(text); errorMsg = json.message || json.error || errorMsg; } catch(e) {}
 
     if (res.ok || res.status === 201) {
-      showToast('success', 'Restaurant Updated! ✅', text || 'Restaurant updated successfully.');
+      showToast('success', 'Restaurant Updated! ✅', 'Restaurant details have been saved.');
       closeEditRestaurantModal();
       fetchAllRestaurants();
+    } else if (res.status === 404) {
+      // Backend now throws ResourceNotFoundException with JSON body
+      showToast('error', 'Not Found 🔍', errorMsg || 'Restaurant no longer exists.');
+      closeEditRestaurantModal();
+      fetchAllRestaurants();
+    } else if (res.status === 409) {
+      // AlreadyExistException — phone number duplicate
+      showToast('error', 'Already Exists ⚠️', errorMsg || 'This phone number is already in use.');
     } else {
-      showToast('error', `Error ${res.status}`, errorMsg || 'Update failed.');
+      showToast('error', `Error ${res.status}`, errorMsg);
     }
   } catch (err) {
     console.error(err);
@@ -1353,17 +1370,23 @@ async function submitUser(name, email, phone) {
       body: JSON.stringify(payload)
     });
     const text = await res.text();
-    let errorMsg = text;
-    try { const json = JSON.parse(text); if (json.message || json.error) errorMsg = json.message || json.error; } catch (e) {}
+    let errorMsg = 'Failed to create user.';
+    let parsedJson = null;
+    try { parsedJson = JSON.parse(text); errorMsg = parsedJson.message || parsedJson.error || errorMsg; } catch (e) {}
 
     if (res.status === 201 || res.status === 200) {
-      showToast('success', 'User Created! ✅', text || 'User added successfully.');
+      // Backend now returns UserResponseDTO — show the created user's name
+      const uName = parsedJson && parsedJson.userName ? parsedJson.userName : 'User';
+      showToast('success', 'User Created! ✅', `"${uName}" has been added successfully.`);
       document.getElementById('form-user').reset();
-      
-      // Refresh the user list from the database
       fetchAllUsers();
+    } else if (res.status === 409) {
+      // AlreadyExistException — duplicate email or phone
+      showToast('error', 'Already Exists ⚠️', errorMsg || 'Email or phone number is already registered.');
+    } else if (res.status === 400) {
+      showToast('error', 'Validation Failed', errorMsg || 'Please check all fields and try again.');
     } else {
-      showToast('error', `Error ${res.status}`, errorMsg || 'Failed to create user.');
+      showToast('error', `Error ${res.status}`, errorMsg);
     }
   } catch (err) {
     console.error(err);
@@ -1397,20 +1420,19 @@ async function deleteUserApi() {
   try {
     const res = await fetch(`${BASE_URL}/user/${userId}`, { method: 'DELETE' });
     const text = await res.text();
-    let errorMsg = text;
-    try { const json = JSON.parse(text); if (json.message || json.error) errorMsg = json.message || json.error; } catch (e) {}
+    let errorMsg = 'Delete failed.';
+    try { const json = JSON.parse(text); errorMsg = json.message || json.error || errorMsg; } catch (e) {}
 
     if (res.ok) {
-      showToast('success', 'User Deleted! 🗑️', text || 'User deleted successfully.');
+      showToast('success', 'User Deleted! 🗑️', 'User and all associated data have been removed.');
       idInput.value = '';
-      
-      // Refresh the user list from the database
       fetchAllUsers();
-      
     } else if (res.status === 404) {
-      showToast('error', 'Not Found', errorMsg || 'User not found or already deleted.');
+      // Backend now throws ResourceNotFoundException with JSON body
+      showToast('error', 'Not Found 🔍', errorMsg || 'User not found or already deleted.');
+      fetchAllUsers();
     } else {
-      showToast('error', `Error ${res.status}`, errorMsg || 'Delete failed.');
+      showToast('error', `Error ${res.status}`, errorMsg);
     }
   } catch (err) {
     console.error(err);
@@ -1467,25 +1489,28 @@ async function submitEditUser() {
       body: JSON.stringify({ userName: name, userEmail: email, userPhoneNumber: phone })
     });
     const text = await res.text();
-    // Try to extract a meaningful error from backend JSON
-    let errorMsg = text;
+    let errorMsg = 'Update failed.';
     try {
       const json = JSON.parse(text);
-      errorMsg = json.message || json.error || JSON.stringify(json);
+      errorMsg = json.message || json.error || errorMsg;
     } catch(e) {}
 
     if (res.ok || res.status === 201) {
       showToast('success', 'User Updated! ✅', 'User details have been saved.');
       closeEditUserModal();
       fetchAllUsers();
-    } else if (res.status === 400) {
-      showToast('error', 'Validation Error', errorMsg || 'Check email/phone uniqueness.');
+    } else if (res.status === 409) {
+      // AlreadyExistException — duplicate email or phone
+      showToast('error', 'Already Exists ⚠️', errorMsg || 'Email or phone number is already used by another user.');
     } else if (res.status === 404) {
-      showToast('error', 'User Not Found', 'This user may have already been deleted.');
+      // ResourceNotFoundException — user was deleted by someone else
+      showToast('error', 'User Not Found 🔍', errorMsg || 'This user may have already been deleted.');
       closeEditUserModal();
       fetchAllUsers();
+    } else if (res.status === 400) {
+      showToast('error', 'Validation Error', errorMsg || 'Please check your inputs.');
     } else {
-      showToast('error', `Error ${res.status}`, errorMsg || 'Update failed.');
+      showToast('error', `Error ${res.status}`, errorMsg);
     }
   } catch (err) {
     console.error(err);
