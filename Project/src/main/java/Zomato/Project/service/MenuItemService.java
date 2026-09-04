@@ -32,8 +32,8 @@ public class MenuItemService {
         }
 
         Restaurant restaurant = checkRestaurantExisting.get();
-        MenuItem existingMenuItem = menuItemRepository.findByRestaurantAndMenuItemName(restaurant, menuItemRequestDTO.getMenuItemName());
-        if (existingMenuItem != null) {
+        Optional<MenuItem> existingMenuItem = menuItemRepository.findByRestaurantAndMenuItemName(restaurant, menuItemRequestDTO.getMenuItemName());
+        if (existingMenuItem.isPresent()) {
             throw new AlreadyExistException("already menu item exist");
 
         }
@@ -97,9 +97,9 @@ public class MenuItemService {
         if (restaurant == null) {
             throw new ResourceNotFoundException("does not exist");
         }
-        MenuItem duplicate = menuItemRepository.findByRestaurantAndMenuItemName(restaurant, menuItemRequestDTO.getMenuItemName());
+        Optional<MenuItem> duplicate = menuItemRepository.findByRestaurantAndMenuItemName(restaurant, menuItemRequestDTO.getMenuItemName());
 
-        if (duplicate != null && !duplicate.getId().equals(menuItemId)) {
+        if (duplicate.isPresent() && !duplicate.get().getId().equals(menuItemId)) {
             throw new AlreadyExistException("already exist menu item");
         }
         MenuItem existingMenuItem = menuItemRepository.findById(menuItemId).get();
