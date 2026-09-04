@@ -363,7 +363,10 @@ function addVariant() {
   card.innerHTML = `
     <div class="variant-header">
       <span class="variant-title">Variant #${idx}</span>
-      <button type="button" class="btn-remove-variant" onclick="removeVariant(${idx})">✕ Remove</button>
+      <div>
+        <button type="button" class="btn-remove-variant" onclick="autofillData('variant', ${idx})" style="color:var(--brand); border-color:var(--brand); margin-right:8px;">🪄 Autofill</button>
+        <button type="button" class="btn-remove-variant" onclick="removeVariant(${idx})">✕ Remove</button>
+      </div>
     </div>
     <div class="variant-grid">
       <div class="form-group">
@@ -1662,5 +1665,44 @@ async function submitAddAddress() {
   } finally {
     btn.disabled = false;
     btn.textContent = 'Save Address';
+  }
+}
+
+/* ────────────────────────────────────────
+   AUTOFILL DEMO DATA
+   ──────────────────────────────────────── */
+function autofillData(type, idx = null) {
+  const randomSuffix = Math.floor(1000 + Math.random() * 9000);
+  
+  if (type === 'restaurant') {
+    document.getElementById('r-name').value = `Test Cafe ${randomSuffix}`;
+    document.getElementById('r-phone').value = `98${randomSuffix}0000`;
+    document.getElementById('r-street1').value = `123 Demo Street`;
+    document.getElementById('r-pincode').value = `110001`;
+    document.getElementById('r-state').value = `Delhi`;
+    document.getElementById('r-country').value = `India`;
+    document.getElementById('r-lat').value = (28.6 + Math.random() * 0.1).toFixed(4);
+    document.getElementById('r-lng').value = (77.2 + Math.random() * 0.1).toFixed(4);
+    showToast('success', 'Autofilled! 🪄', 'Restaurant data populated.');
+  } 
+  else if (type === 'menuitem') {
+    document.getElementById('m-name').value = `Spicy Burger ${randomSuffix}`;
+    document.getElementById('m-description').value = `Delicious and juicy demo burger.`;
+    document.getElementById('m-label').value = `Bestseller`;
+    selectType('NONVEG');
+    if (!document.getElementById('m-restaurant-id').value) {
+      document.getElementById('m-restaurant-id').value = '1';
+    }
+    showToast('success', 'Autofilled! 🪄', 'Menu Item data populated.');
+  }
+  else if (type === 'user') {
+    document.getElementById('u-name').value = `Test User ${randomSuffix}`;
+    document.getElementById('u-email').value = `test${randomSuffix}@example.com`;
+    document.getElementById('u-phone').value = `99${randomSuffix}1234`;
+    showToast('success', 'Autofilled! 🪄', 'User data populated.');
+  }
+  else if (type === 'variant' && idx !== null) {
+    document.getElementById(`v${idx}-name`).value = `Medium ${randomSuffix}`;
+    document.getElementById(`v${idx}-price`).value = Math.floor(Math.random() * 300) + 99;
   }
 }

@@ -196,6 +196,9 @@
                 </div>
 
                 <div class="form-actions">
+                  <button type="button" class="btn-secondary" onclick="autofillData('restaurant')" style="color:var(--brand); border-color:var(--brand);">
+                    🪄 Autofill
+                  </button>
                   <button type="button" class="btn-secondary" onclick="resetForm('form-restaurant')">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.31"/></svg>
                     Reset
@@ -464,6 +467,9 @@
                 <div id="variants-container"></div>
 
                 <div class="form-actions">
+                  <button type="button" class="btn-secondary" onclick="autofillData('menuitem')" style="color:var(--brand); border-color:var(--brand);">
+                    🪄 Autofill
+                  </button>
                   <button type="button" class="btn-secondary" onclick="resetMenuItemForm()">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.31"/></svg>
                     Reset
@@ -508,7 +514,10 @@
 
       <!-- Add User Form -->
       <div class="card">
-        <h3 style="margin-top:0; font-size:1.1rem; margin-bottom:16px;">&#10133; Add New User</h3>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+          <h3 style="margin:0; font-size:1.1rem;">&#10133; Add New User</h3>
+          <button type="button" onclick="autofillData('user')" style="font-size:0.75rem; color:var(--brand); background:var(--bg-base); border:1px solid var(--brand); border-radius:8px; padding:4px 12px; cursor:pointer; font-weight:600;">🪄 Autofill</button>
+        </div>
         <form id="form-user" onsubmit="event.preventDefault(); validateUser();">
           <div class="form-grid">
             <div class="form-group">
