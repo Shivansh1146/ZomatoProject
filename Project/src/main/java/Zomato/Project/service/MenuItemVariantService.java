@@ -4,6 +4,8 @@ import Zomato.Project.dto.CombineMenuItemAndMenuItemVariantRequestDTO;
 import Zomato.Project.entity.MenuItem;
 import Zomato.Project.entity.MenuItemVariant;
 import Zomato.Project.entity.Restaurant;
+import Zomato.Project.exception.InvalidRequestException;
+import Zomato.Project.exception.ResourceNotFoundException;
 import Zomato.Project.repository.MenuItemVariantRepository;
 import Zomato.Project.repository.RestaurantRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +27,7 @@ public class MenuItemVariantService {
 
         Restaurant restaurant = restaurantRepository.findByIdAndMenuItemListIdAndMenuItemList_MenuItemVariantListId(restaurantId, menuItemId, menuItemVariantId);
         if (restaurant == null) {
-            return "does not exist";
+            throw new ResourceNotFoundException("does not exist");
         }
         MenuItemVariant existingMenuItemVariant = menuItemVariantRepository.findById(menuItemVariantId).get();
 
@@ -45,7 +47,7 @@ public class MenuItemVariantService {
     public String deleteMenuItemVariant(Long menuItemVariantId) {
         Optional<MenuItemVariant> existingMenuItemVariant = menuItemVariantRepository.findById(menuItemVariantId);
         if (existingMenuItemVariant.isEmpty()) {
-            return "does not exist menu Item variant";
+            throw new ResourceNotFoundException("does not exist menu Item variant");
         }
         MenuItemVariant menuItemVariant = existingMenuItemVariant.get();
         MenuItem menuItem = menuItemVariant.getMenuItem();
@@ -53,9 +55,8 @@ public class MenuItemVariantService {
         List<MenuItemVariant> menuItemVariantList = menuItem.getMenuItemVariantList();
 
         if (menuItemVariantList.size() == 1) {
-            return "cannot delete last variant, at least one variant is required ";
+            throw new InvalidRequestException("cannot delete last variant, at least one variant is required ");
         }
-
 
         menuItemVariantRepository.deleteById(menuItemVariantId);
         return "Successfully your Menu item Variant is deleted";

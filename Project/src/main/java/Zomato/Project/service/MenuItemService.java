@@ -5,6 +5,9 @@ import Zomato.Project.dto.MenuItemVariantRequestDTO;
 import Zomato.Project.entity.MenuItem;
 import Zomato.Project.entity.MenuItemVariant;
 import Zomato.Project.entity.Restaurant;
+import Zomato.Project.exception.AlreadyExistException;
+import Zomato.Project.exception.InvalidRequestException;
+import Zomato.Project.exception.ResourceNotFoundException;
 import Zomato.Project.repository.MenuItemRepository;
 import Zomato.Project.repository.RestaurantRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,34 +25,36 @@ public class MenuItemService {
     private RestaurantRepository restaurantRepository;
 
     public String addMenuItem(MenuItemRequestDTO menuItemRequestDTO) {
+
         Optional<Restaurant> checkRestaurantExisting = restaurantRepository.findById(menuItemRequestDTO.getRestaurantId());
         if (checkRestaurantExisting.isEmpty()) {
-            return "Restaurant ID does not exist";
+            throw new ResourceNotFoundException("Restaurant ID does not exist");
         }
+
         Restaurant restaurant = checkRestaurantExisting.get();
         MenuItem existingMenuItem = menuItemRepository.findByRestaurantAndMenuItemName(restaurant, menuItemRequestDTO.getMenuItemName());
         if (existingMenuItem != null) {
-            return "already menu item exist";
+            throw new AlreadyExistException("already menu item exist");
 
         }
+
         if (menuItemRequestDTO.getMenuItemVariantRequestDTOList() != null) {
             for (MenuItemVariantRequestDTO menuItemVariantRequestDTOList : menuItemRequestDTO.getMenuItemVariantRequestDTOList()) {
 
                 if (Boolean.TRUE.equals(menuItemVariantRequestDTOList.getInventoryManaged()) && menuItemVariantRequestDTOList.getCurrentAvailableInventoryCount() == null) {
-                    return "inventory count is required when inventory is  managed ";
+                    throw new InvalidRequestException("inventory count is required when inventory is  managed ");
                 }
             }
         }
 
 
         MenuItem menuItem = convertDTOToEntity(menuItemRequestDTO, restaurant);
-
-
         menuItemRepository.save(menuItem);
 
         return "Successfully your Menu item is added";
 
     }
+
 
     private MenuItem convertDTOToEntity(MenuItemRequestDTO menuItemRequestDTO, Restaurant restaurant) {
         MenuItem menuItem = new MenuItem();
@@ -90,7 +95,12 @@ public class MenuItemService {
 
         Restaurant restaurant = restaurantRepository.findByIdAndMenuItemListId(restaurantId, menuItemId);
         if (restaurant == null) {
-            return "does not exist";
+            throw new ResourceNotFoundException("does not exist");
+        }
+        MenuItem duplicate = menuItemRepository.findByRestaurantAndMenuItemName(restaurant, menuItemRequestDTO.getMenuItemName());
+
+        if (duplicate != null && !duplicate.getId().equals(menuItemId)) {
+            throw new AlreadyExistException("already exist menu item");
         }
         MenuItem existingMenuItem = menuItemRepository.findById(menuItemId).get();
 
@@ -109,7 +119,7 @@ public class MenuItemService {
     public String deleteMenuItem(Long menuItemId) {
         Optional<MenuItem> menuItem = menuItemRepository.findById(menuItemId);
         if (menuItem.isEmpty()) {
-            return "menu item does not exist";
+            throw new ResourceNotFoundException("menu item does not exist");
         }
 
         menuItemRepository.deleteById(menuItemId);

@@ -18,12 +18,13 @@ public class UserController {
     private UserService userService;
 
     @PostMapping
-    public ResponseEntity<String> addUser(@Valid @RequestBody UserRequestDTO userRequestDTO) {
-        String response = userService.addUser(userRequestDTO);
-        if (response.equals("Successful user is added")) {
-            return ResponseEntity.status(201).body(response);
-        }
-        return ResponseEntity.badRequest().body(response);
+    public ResponseEntity<UserResponseDTO> addUser(@Valid @RequestBody UserRequestDTO userRequestDTO) {
+//        String response = userService.addUser(userRequestDTO);
+//        if (response.equals("Successful user is added")) {
+//            return ResponseEntity.status(201).body(response);
+//        }
+//        return ResponseEntity.badRequest().body(response);
+        return ResponseEntity.status(201).body(userService.addUser(userRequestDTO));
     }
 
     @DeleteMapping("/{userId}")

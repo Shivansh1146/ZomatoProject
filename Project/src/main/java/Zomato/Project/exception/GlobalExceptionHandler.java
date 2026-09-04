@@ -9,9 +9,25 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(exception = RestaurantAlreadyExistException.class)
+    @ExceptionHandler(exception = AlreadyExistException.class)
     @ResponseStatus(value = HttpStatus.CONFLICT)
-    public ErrorDTO handleRestaurantAlreadyExistException(RestaurantAlreadyExistException e){
+    public ErrorDTO handleAlreadyExistException(AlreadyExistException e) {
+        ErrorDTO errorDTO = new ErrorDTO();
+        errorDTO.setMessage(e.getMessage());
+        return errorDTO;
+    }
+
+    @ExceptionHandler(exception = ResourceNotFoundException.class)
+    @ResponseStatus(value = HttpStatus.NOT_FOUND)
+    public ErrorDTO handleResourceNotFoundException(ResourceNotFoundException e){
+        ErrorDTO errorDTO = new ErrorDTO();
+        errorDTO.setMessage(e.getMessage());
+        return errorDTO;
+    }
+
+    @ExceptionHandler(exception = InvalidRequestException.class)
+    @ResponseStatus(value = HttpStatus.BAD_REQUEST)
+    public ErrorDTO handleInvalidRequestException(InvalidRequestException e){
         ErrorDTO errorDTO = new ErrorDTO();
         errorDTO.setMessage(e.getMessage());
         return errorDTO;

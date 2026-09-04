@@ -3,6 +3,7 @@ package Zomato.Project.service;
 import Zomato.Project.dto.AddressRequestDTO;
 import Zomato.Project.entity.Address;
 import Zomato.Project.entity.User;
+import Zomato.Project.exception.ResourceNotFoundException;
 import Zomato.Project.repository.AddressRepository;
 import Zomato.Project.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,10 +20,8 @@ public class AddressService {
 
     public String addAddressInUser(Long userId, AddressRequestDTO addressRequestDTO) {
 
+        validationAddressRequestDTO(userId);
         Optional<User> checkingUserId = userRepository.findById(userId);
-        if (checkingUserId.isEmpty()) {
-            return "user id does not exist";
-        }
         User user = checkingUserId.get();
 
         Address address = new Address();
@@ -42,5 +41,12 @@ public class AddressService {
         return "Successfully your address is added ";
 
 
+    }
+
+    private void validationAddressRequestDTO(Long userId) {
+        Optional<User> checkingUserId = userRepository.findById(userId);
+        if (checkingUserId.isEmpty()) {
+            throw new ResourceNotFoundException("user id does not exist");
+        }
     }
 }

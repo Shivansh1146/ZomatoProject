@@ -8,7 +8,8 @@ import Zomato.Project.entity.Address;
 import Zomato.Project.entity.MenuItem;
 import Zomato.Project.entity.MenuItemVariant;
 import Zomato.Project.entity.Restaurant;
-import Zomato.Project.exception.RestaurantAlreadyExistException;
+import Zomato.Project.exception.AlreadyExistException;
+import Zomato.Project.exception.ResourceNotFoundException;
 import Zomato.Project.repository.RestaurantRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -35,7 +36,7 @@ public class RestaurantService {
     private void validationRestaurantRequestDTO(RestaurantRequestDTO restaurantRequestDTO) {
         Optional<Restaurant> existing = restaurantRepository.findByRestaurantPhoneNumber(restaurantRequestDTO.getRestaurantPhoneNumber());
         if (existing.isPresent()) {
-            throw new RestaurantAlreadyExistException("Phone number is already exist");
+            throw new AlreadyExistException("Phone number is already exist");
         }
 
     }
@@ -61,13 +62,13 @@ public class RestaurantService {
     }
 
     public RestaurantResponseDTO getRestaurant(Long id) {
-        Restaurant restaurant = restaurantRepository.findById(id).orElse(null);
-        if (restaurant == null) {
-            return null;
+        Optional<Restaurant> restaurant = restaurantRepository.findById(id);
+        if (restaurant.isEmpty()) {
+            throw new ResourceNotFoundException("restaurant does not exist");
         }
-        return convertRestaurantToRestaurantResponseDTO(restaurant);
 
-
+        Restaurant existingrestaurant = restaurant.get();
+        return convertRestaurantToRestaurantResponseDTO(existingrestaurant);
     }
 
     private RestaurantResponseDTO convertRestaurantToRestaurantResponseDTO(Restaurant restaurant) {
@@ -137,7 +138,7 @@ public class RestaurantService {
     public String deleteRestaurant(Long restaurantId) {
         Optional<Restaurant> existingRestaurant = restaurantRepository.findById(restaurantId);
         if (existingRestaurant.isEmpty()) {
-            return "restaurant does not exist";
+            throw new ResourceNotFoundException("restaurant does not exist");
         }
         restaurantRepository.deleteById(restaurantId);
         return "Successful Restaurant is deleted";
@@ -146,7 +147,7 @@ public class RestaurantService {
     public String editRestaurant(Long restaurantId, RestaurantRequestDTO restaurantRequestDTO) {
         Optional<Restaurant> checkRestaurant = restaurantRepository.findById(restaurantId);
         if (checkRestaurant.isEmpty()) {
-            return "restaurant does not exist ";
+            throw new ResourceNotFoundException("restaurant does not exist");
         }
         Restaurant existingRestaurant = checkRestaurant.get();
 
