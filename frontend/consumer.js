@@ -141,40 +141,22 @@ async function fetchNearbyRestaurants(el) {
 
   if (loading) {
     loading.style.display = 'block';
-    loading.textContent = '📍 Finding restaurants near your location…';
+    loading.textContent = '📍 Finding restaurants within 5 km of your location…';
   }
 
   const coords = await getPosition();
-  let nearbyData = null;
 
   try {
     const res = await fetch(`${BASE_URL}/restaurant/getRestaurantToUser?userLon=${coords.lng}&userLat=${coords.lat}`);
     if (res.ok) {
       const data = await res.json();
-      if (Array.isArray(data) && data.length > 0) {
-        nearbyData = data;
-      }
+      allRestaurants = Array.isArray(data) ? data : [];
+    } else {
+      allRestaurants = [];
     }
   } catch (e) {
-    console.warn('Backend getRestaurantToUser error or unreachable:', e);
-  }
-
-  // If spatial query yielded results, display them!
-  // Otherwise, load all restaurants and highlight them as nearest available
-  if (nearbyData && nearbyData.length > 0) {
-    allRestaurants = nearbyData;
-  } else {
-    // If not yet loaded or empty, fetch standard list
-    if (!allRestaurants || allRestaurants.length === 0) {
-      try {
-        const resAll = await fetch(`${BASE_URL}/restaurant`);
-        if (resAll.ok) {
-          allRestaurants = await resAll.json() || [];
-        }
-      } catch (err) {
-        console.error('Fetch all fallback error:', err);
-      }
-    }
+    console.warn('Backend getRestaurantToUser error:', e);
+    allRestaurants = [];
   }
 
   if (loading) loading.style.display = 'none';
@@ -184,8 +166,11 @@ async function fetchNearbyRestaurants(el) {
   const term = (searchInput ? searchInput.value : '').toLowerCase();
   applyFilter(term);
 
-  // Show a helpful toast indicating location detected
-  showToast('📍 Showing closest restaurants to your area');
+  if (allRestaurants.length > 0) {
+    showToast(`📍 Found ${allRestaurants.length} restaurant(s) within 5 km`);
+  } else {
+    showToast('📍 No restaurants found within 5 km of your location');
+  }
 }
 
 function renderRestaurants(restaurants) {
@@ -195,9 +180,9 @@ function renderRestaurants(restaurants) {
   if (!restaurants || restaurants.length === 0) {
     grid.innerHTML = `
       <div class="empty-state" style="grid-column:1/-1;">
-        <div style="font-size:3rem;margin-bottom:16px;">🍽️</div>
-        <h3>No restaurants found</h3>
-        <p>Try a different search term.</p>
+        <div style="font-size:3rem;margin-bottom:16px;">📍</div>
+        <h3>No restaurants found within 5 km</h3>
+        <p>There are no restaurants registered within 5 km of this location. Try clicking "All" to browse all available restaurants.</p>
       </div>`;
     return;
   }
