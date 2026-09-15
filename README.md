@@ -1,6 +1,15 @@
-﻿<div align="center">
+<div align="center">
 
-# ðŸ½ï¸ Zomato Clone â€” Full-Stack Food Delivery App
+# 🍽️ Zomato Clone — Full-Stack Food Delivery App
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Java-17-orange?style=for-the-badge&logo=java&logoColor=white" />
+  <img src="https://img.shields.io/badge/Spring%20Boot-4.1.0-6DB33F?style=for-the-badge&logo=springboot&logoColor=white" />
+  <img src="https://img.shields.io/badge/MySQL-8.0-4479A1?style=for-the-badge&logo=mysql&logoColor=white" />
+  <img src="https://img.shields.io/badge/Maven-3.9-C71A36?style=for-the-badge&logo=apachemaven&logoColor=white" />
+  <img src="https://img.shields.io/badge/HTML%2FJS-Frontend-E34F26?style=for-the-badge&logo=html5&logoColor=white" />
+  <img src="https://img.shields.io/badge/Lombok-1.18-blueviolet?style=for-the-badge" />
+</p>
 
 <p align="center">
   A production-ready, full-stack <strong>food delivery platform</strong> inspired by Zomato.<br/>
@@ -13,95 +22,90 @@
 
 ---
 
-## ðŸ“Œ Table of Contents
+## 📌 Table of Contents
 
-- [âœ¨ Features](#-features)
-- [ðŸ—ï¸ Project Architecture](#ï¸-project-architecture)
-- [ðŸ—‚ï¸ Entity Model](#ï¸-entity-model)
-- [ðŸ”— API Endpoints](#-api-endpoints)
-- [âš™ï¸ Tech Stack](#ï¸-tech-stack)
-- [ðŸš€ Getting Started](#-getting-started)
-- [ðŸ› ï¸ Configuration](#ï¸-configuration)
-- [ðŸ“ Project Structure](#-project-structure)
-- [ðŸ¤ Contributing](#-contributing)
-
----
-
-## âœ¨ Features
-
-### ðŸ”™ Backend
-- ðŸª **Restaurant Management** â€” Register and manage restaurants with address mapping
-- ðŸ• **Menu Item Management** â€” Add menu items with variants, ratings, and types (VEG/NON-VEG)
-- ðŸ§¹ **Full CRUD & Soft Delete** â€” Fully functional `DELETE` endpoints for restaurants, menu items, and variants. Records are soft-deleted using Hibernate's `@SoftDelete`
-- ðŸ“ **GPS Nearby Search** â€” Find restaurants within a configurable radius using a native SQL Haversine formula query
-- ðŸ•’ **Audit Timestamps** â€” Automatic creation timestamps (`createdAt` / `userAccountCreatedTime`) on all entities via `@CreationTimestamp`
-- ðŸ“¦ **Inventory Management** â€” Track stock limits (`inventoryManaged`, `currentAvailableInventoryCount`) through DTOs to the DB
-- âœ… **Request Validation & Error Handling** â€” Full input validation using `spring-boot-starter-validation` with a `GlobalExceptionHandler` returning structured `ErrorDTO`
-- ðŸ›ï¸ **Layered Architecture** â€” Clean separation: Controller â†’ Service â†’ Repository â†’ Entity
-
-### ðŸ–¥ï¸ Frontend
-- ðŸŽ¨ **Admin / Partner Panel** (`index.html` + `app_v2.js`) â€” Fully-responsive light-theme dashboard for Restaurant, Menu Item, Variant, and User CRUD; includes 1-click autofill buttons and live inventory tracking
-- ðŸ” **Consumer Storefront** (`consumer.html` + `consumer.js`) â€” A stunning customer UI with hero search, live All/Veg/Non-Veg filters, GPS nearby discovery, promotional offer tags, and slide-up restaurant menus with intelligent food image mapping
-- ðŸ§ª **API Test Suite** (`test_apis.js`) â€” Node.js automated test runner covering all 28 endpoints
+- [✨ Features](#-features)
+- [🏗️ Project Architecture](#️-project-architecture)
+- [🗂️ Entity Model](#️-entity-model)
+- [🔗 API Endpoints](#-api-endpoints)
+- [⚙️ Tech Stack](#️-tech-stack)
+- [🚀 Getting Started](#-getting-started)
+- [🛠️ Configuration](#️-configuration)
+- [📁 Project Structure](#-project-structure)
+- [🤝 Contributing](#-contributing)
 
 ---
 
-## ðŸ—ï¸ Project Architecture
+## ✨ Features
+
+- 🏪 **Restaurant Management** — Register and manage restaurants with address mapping
+- 🍕 **Menu Item Management** — Add menu items with variants, ratings, and types (VEG/NON-VEG)
+- 🧹 **Full CRUD & Soft Delete** — Fully functional `DELETE` endpoints for restaurants, menu items, and variants. Records are soft-deleted using Hibernate's `@SoftDelete`
+- 🕒 **Audit Timestamps** — Automatic creation timestamps (`createdAt` / `userAccountCreatedTime`) on all entities via `@CreationTimestamp`, dynamically rendered in the UI.
+- 📦 **Inventory Management** — Track stock limits (`inventoryManaged`, `currentAvailableInventoryCount`) seamlessly through the DTOs to the DB.
+- ✅ **Request Validation & Error Handling** — Full input validation using `spring-boot-starter-validation`. The frontend smartly parses ugly JSON backend errors into clean, responsive UI toasts!
+- 🏛️ **Layered Architecture** — Clean separation between Controller → Service → Repository → Entity layers
+- 🎨 **Admin Panel Frontend** — Includes a fully-responsive light-theme frontend built with Zomato aesthetics to view dashboards, track inventory, execute CRUD operations, and manage complex menu items.
+- 🍔 **Consumer-Facing App** — A stunning, real-world customer UI (`consumer.html`) featuring a hero search banner, live filtering (All/Veg/Non-Veg), promotional offer tags, and beautiful slide-up restaurant menus with intelligent food image mapping (using Unsplash photography) synced seamlessly with the backend.
+
+---
+
+## 🏗️ Project Architecture
 
 ```
 Client (Postman / Frontend)
-         â”‚
-         â–¼
-  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-  â”‚  Controller  â”‚  â† REST endpoints, request validation
-  â””â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”˜
-         â”‚
-  â”Œâ”€â”€â”€â”€â”€â”€â–¼â”€â”€â”€â”€â”€â”€â”
-  â”‚   Service    â”‚  â† Business logic
-  â””â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”˜
-         â”‚
-  â”Œâ”€â”€â”€â”€â”€â”€â–¼â”€â”€â”€â”€â”€â”€â”
-  â”‚ Repository   â”‚  â† Spring Data JPA (CRUD)
-  â””â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”˜
-         â”‚
-  â”Œâ”€â”€â”€â”€â”€â”€â–¼â”€â”€â”€â”€â”€â”€â”
-  â”‚  MySQL DB    â”‚  â† Persistent storage
-  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+         │
+         ▼
+  ┌─────────────┐
+  │  Controller  │  ← REST endpoints, request validation
+  └──────┬──────┘
+         │
+  ┌──────▼──────┐
+  │   Service    │  ← Business logic
+  └──────┬──────┘
+         │
+  ┌──────▼──────┐
+  │ Repository   │  ← Spring Data JPA (CRUD)
+  └──────┬──────┘
+         │
+  ┌──────▼──────┐
+  │  MySQL DB    │  ← Persistent storage
+  └─────────────┘
 ```
 
 ---
 
-## ðŸ—‚ï¸ Entity Model
+## 🗂️ Entity Model
 
 ```
 Base (MappedSuperclass)
- â”œâ”€â”€ id (Auto-generated PK)
- â””â”€â”€ createdAt (Auto timestamp)
+ ├── id (Auto-generated PK)
+ └── createdAt (Auto timestamp)
 
-Restaurant â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ extends Base
- â”œâ”€â”€ restaurantName
- â”œâ”€â”€ restaurantPhoneNumber (unique)
- â”œâ”€â”€ restaurantAddress   â”€â”€â†’ Address (OneToOne)
- â””â”€â”€ menuItemList        â”€â”€â†’ List<MenuItem> (OneToMany)
+Restaurant ──────────── extends Base
+ ├── restaurantName
+ ├── restaurantPhoneNumber (unique)
+ ├── restaurantAddress   ──→ Address (OneToOne)
+ └── menuItemList        ──→ List<MenuItem> (OneToMany)
 
-MenuItem â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ extends Base
- â”œâ”€â”€ menuItemName
- â”œâ”€â”€ menuItemDescription
- â”œâ”€â”€ menuItemType        â”€â”€â†’ MenuItemType (VEG / NON_VEG)
- â”œâ”€â”€ menuItemRating
- â”œâ”€â”€ menuItemLabel
- â”œâ”€â”€ menuItemVariantList â”€â”€â†’ List<MenuItemVariant> (OneToMany)
- â””â”€â”€ restaurant          â”€â”€â†’ Restaurant (ManyToOne)
+MenuItem ────────────── extends Base
+ ├── menuItemName
+ ├── menuItemDescription
+ ├── menuItemType        ──→ MenuItemType (VEG / NON_VEG)
+ ├── menuItemRating
+ ├── menuItemLabel
+ ├── menuItemVariantList ──→ List<MenuItemVariant> (OneToMany)
+ └── restaurant          ──→ Restaurant (ManyToOne)
 
-Address â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ standalone entity
-User â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ standalone entity
+Address ─────────────── standalone entity
+User ───────────────── standalone entity
 ```
 
 ---
 
-## ðŸ”— API Endpoints
+## 🔗 API Endpoints
 
-### ðŸª Restaurant
+### 🏪 Restaurant
 
 | Method | Endpoint         | Description           | Body / Response          |
 |--------|------------------|-----------------------|--------------------------|
@@ -112,7 +116,7 @@ User â”€â”€â”€â”€â”€â”€â”€â”€â”€â�
 | `DELETE`| `/restaurant/{id}`| Delete a restaurant   | Res: `String`              |
 | `GET`  | `/restaurant/getRestaurantToUser` | Get nearby restaurants by GPS | Query: `userLon`, `userLat` |
 
-### ðŸ• Menu Item
+### 🍕 Menu Item
 
 | Method   | Endpoint           | Description          | Body / Response            |
 |----------|--------------------|----------------------|----------------------------|
@@ -120,14 +124,14 @@ User â”€â”€â”€â”€â”€â”€â”€â”€â”€â�
 | `PUT`    | `/menuItem/{id}`   | Update a menu item   | Req: `MenuItemRequestDTO`  |
 | `DELETE` | `/menuItem/{id}`   | Delete a menu item   | Res: `String`              |
 
-### ðŸ·ï¸ Menu Item Variant
+### 🏷️ Menu Item Variant
 
 | Method | Endpoint                | Description               | Body / Response                                  |
 |--------|-------------------------|---------------------------|--------------------------------------------------|
 | `PUT`  | `/menuItemVariant/{id}` | Update a menu item variant| Req: `CombineMenuItemAndMenuItemVariantRequestDTO` |
 | `DELETE`| `/menuItemVariant/{id}`| Delete a menu item variant| Res: `String` (Guards last remaining variant)    |
 
-### ðŸ‘¤ User & Address Management
+### 👤 User & Address Management
 
 | Method | Endpoint         | Description           | Body / Response          |
 |--------|------------------|-----------------------|--------------------------|
@@ -138,19 +142,19 @@ User â”€â”€â”€â”€â”€â”€â”€â”€â”€â�
 | `DELETE`| `/user/{id}`     | Delete a user         | Res: `String`            |
 | `POST` | `/address/{userId}` | Add delivery address to user | Req: `AddressRequestDTO` |
 
-> ðŸ’¡ `POST` and `PUT` endpoints return `HTTP 201 Created` on success. `GET` and `DELETE` return `HTTP 200 OK`. Full input validation is backed by Hibernate Validator and managed through custom Exception Handlers.
+> 💡 `POST` and `PUT` endpoints return `HTTP 201 Created` on success. `GET` and `DELETE` return `HTTP 200 OK`. Full input validation is backed by Hibernate Validator and managed through custom Exception Handlers.
 
 ---
 
-## âš™ï¸ Tech Stack
+## ⚙️ Tech Stack
 
 | Technology                     | Version  | Purpose                              |
 |--------------------------------|----------|--------------------------------------|
 | Java                           | 17       | Core programming language            |
 | Spring Boot                    | 4.1.0    | Application framework                |
-| Spring Data JPA / Hibernate    | â€”        | ORM & database interaction           |
-| Spring Web MVC                 | â€”        | REST API layer                       |
-| Spring Boot Validation         | â€”        | Request body validation              |
+| Spring Data JPA / Hibernate    | —        | ORM & database interaction           |
+| Spring Web MVC                 | —        | REST API layer                       |
+| Spring Boot Validation         | —        | Request body validation              |
 | SpringDoc OpenAPI / Swagger    | 3.1.0    | API Documentation (Swagger UI)       |
 | MySQL                          | 8.x      | Relational database                  |
 | Lombok                         | 1.18.46  | Boilerplate reduction (getters, etc) |
@@ -159,15 +163,15 @@ User â”€â”€â”€â”€â”€â”€â”€â”€â”€â�
 
 ---
 
-## ðŸš€ Getting Started
+## 🚀 Getting Started
 
 ### Prerequisites
 
 Make sure you have the following installed:
 
-- â˜• [Java 17+](https://adoptium.net/)
-- ðŸ—ƒï¸ [MySQL 8.x](https://dev.mysql.com/downloads/)
-- ðŸ”¨ [Maven 3.x](https://maven.apache.org/download.cgi) (or use the bundled `mvnw`)
+- ☕ [Java 17+](https://adoptium.net/)
+- 🗃️ [MySQL 8.x](https://dev.mysql.com/downloads/)
+- 🔨 [Maven 3.x](https://maven.apache.org/download.cgi) (or use the bundled `mvnw`)
 
 ### Installation
 
@@ -213,7 +217,7 @@ cd ZomatoProject/Project
 
 **6. Access Swagger UI**
 Once the backend is running, you can interact with the APIs directly via Swagger UI at:
-ðŸ‘‰ **`http://localhost:9090/swagger-ui/index.html`**
+👉 **`http://localhost:9090/swagger-ui/index.html`**
 
 **7. Run the Frontend Applications (Admin & Consumer)**
 To view the frontends, you must serve the HTML/JS files using a simple HTTP server (this avoids CORS and file:// protocol issues).
@@ -229,12 +233,12 @@ python -m http.server 3000
 
 **8. Open the Apps in your Browser**
 With both the backend and frontend servers running, open your browser and navigate to:
-- ðŸ” **Customer App (Ordering):** [http://localhost:3000/consumer.html](http://localhost:3000/consumer.html)
-- ðŸ› ï¸ **Admin Panel (Management):** [http://localhost:3000/index.html](http://localhost:3000/index.html)
+- 🍔 **Customer App (Ordering):** [http://localhost:3000/consumer.html](http://localhost:3000/consumer.html)
+- 🛠️ **Admin Panel (Management):** [http://localhost:3000/index.html](http://localhost:3000/index.html)
 
 ---
 
-## ðŸ› ï¸ Configuration
+## 🛠️ Configuration
 
 | Property                        | Default                               | Description                   |
 |---------------------------------|---------------------------------------|-------------------------------|
@@ -245,75 +249,75 @@ With both the backend and frontend servers running, open your browser and naviga
 
 ---
 
-## ðŸ“ Project Structure
+## 📁 Project Structure
 
 ```
 ZomatoProject/
-â”œâ”€â”€ Project/                      # Spring Boot Backend
-â”‚   â”œâ”€â”€ src/main/java/Zomato/Project/
-â”‚   â”‚   â”œâ”€â”€ controller/
-â”‚   â”‚   â”‚   â”œâ”€â”€ RestaurantController.java    (POST, GET, PUT, DELETE + GPS nearby)
-â”‚   â”‚   â”‚   â”œâ”€â”€ MenuItemController.java      (POST, PUT, DELETE)
-â”‚   â”‚   â”‚   â”œâ”€â”€ MenuItemVariantController.java (PUT, DELETE)
-â”‚   â”‚   â”‚   â”œâ”€â”€ UserController.java          (POST, GET, PUT, DELETE)
-â”‚   â”‚   â”‚   â””â”€â”€ AddressController.java       (POST)
-â”‚   â”‚   â”œâ”€â”€ service/
-â”‚   â”‚   â”‚   â”œâ”€â”€ RestaurantService.java
-â”‚   â”‚   â”‚   â”œâ”€â”€ MenuItemService.java
-â”‚   â”‚   â”‚   â”œâ”€â”€ MenuItemVariantService.java
-â”‚   â”‚   â”‚   â”œâ”€â”€ UserService.java
-â”‚   â”‚   â”‚   â””â”€â”€ AddressService.java
-â”‚   â”‚   â”œâ”€â”€ repository/
-â”‚   â”‚   â”‚   â”œâ”€â”€ RestaurantRepository.java    (incl. native GPS query)
-â”‚   â”‚   â”‚   â”œâ”€â”€ MenuItemRepository.java
-â”‚   â”‚   â”‚   â”œâ”€â”€ MenuItemVariantRepository.java
-â”‚   â”‚   â”‚   â”œâ”€â”€ UserRepository.java
-â”‚   â”‚   â”‚   â””â”€â”€ AddressRepository.java
-â”‚   â”‚   â”œâ”€â”€ entity/
-â”‚   â”‚   â”‚   â”œâ”€â”€ Base.java           (MappedSuperclass: id, createdAt)
-â”‚   â”‚   â”‚   â”œâ”€â”€ Restaurant.java
-â”‚   â”‚   â”‚   â”œâ”€â”€ MenuItem.java
-â”‚   â”‚   â”‚   â”œâ”€â”€ MenuItemVariant.java
-â”‚   â”‚   â”‚   â”œâ”€â”€ Address.java
-â”‚   â”‚   â”‚   â””â”€â”€ User.java
-â”‚   â”‚   â”œâ”€â”€ dto/
-â”‚   â”‚   â”‚   â”œâ”€â”€ RestaurantRequestDTO.java
-â”‚   â”‚   â”‚   â”œâ”€â”€ RestaurantResponseDTO.java
-â”‚   â”‚   â”‚   â”œâ”€â”€ MenuItemRequestDTO.java
-â”‚   â”‚   â”‚   â”œâ”€â”€ MenuItemResponseDTO.java
-â”‚   â”‚   â”‚   â”œâ”€â”€ MenuItemVariantRequestDTO.java
-â”‚   â”‚   â”‚   â”œâ”€â”€ MenuItemVariantResponseDTO.java
-â”‚   â”‚   â”‚   â”œâ”€â”€ CombineMenuItemAndMenuItemVariantRequestDTO.java
-â”‚   â”‚   â”‚   â”œâ”€â”€ UserRequestDTO.java
-â”‚   â”‚   â”‚   â”œâ”€â”€ UserResponseDTO.java
-â”‚   â”‚   â”‚   â”œâ”€â”€ AddressRequestDTO.java
-â”‚   â”‚   â”‚   â””â”€â”€ ErrorDTO.java
-â”‚   â”‚   â”œâ”€â”€ enums/
-â”‚   â”‚   â”‚   â””â”€â”€ MenuItemType.java   (VEG, NONVEG)
-â”‚   â”‚   â”œâ”€â”€ exception/
-â”‚   â”‚   â”‚   â”œâ”€â”€ GlobalExceptionHandler.java
-â”‚   â”‚   â”‚   â”œâ”€â”€ AlreadyExistException.java
-â”‚   â”‚   â”‚   â”œâ”€â”€ ResourceNotFoundException.java
-â”‚   â”‚   â”‚   â””â”€â”€ InvalidRequestException.java
-â”‚   â”‚   â””â”€â”€ ProjectApplication.java
-â”‚   â””â”€â”€ src/main/resources/
-â”‚       â””â”€â”€ application.properties
-â”œâ”€â”€ frontend/
-â”‚   â”œâ”€â”€ index.html        # ðŸ› ï¸ Admin / Partner Panel
-â”‚   â”œâ”€â”€ app_v2.js         # Admin Panel â€“ all API calls, validations, modals
-â”‚   â”œâ”€â”€ consumer.html     # ðŸ” Customer Ordering Storefront
-â”‚   â”œâ”€â”€ consumer.js       # Customer Logic â€“ search, filters, GPS, menu overlay
-â”‚   â”œâ”€â”€ style.css         # Admin Panel Styles
-â”‚   â”œâ”€â”€ logo.png          # Zomato logo asset
-â”‚   â”œâ”€â”€ food-banner.png   # Hero banner image
-â”‚   â””â”€â”€ test_apis.js      # Node.js full API test suite (27/28 tests pass)
-â”œâ”€â”€ README.md
-â””â”€â”€ .gitignore
+├── Project/                      # Spring Boot Backend
+│   ├── src/main/java/Zomato/Project/
+│   │   ├── controller/
+│   │   │   ├── RestaurantController.java    (POST, GET, PUT, DELETE + GPS nearby)
+│   │   │   ├── MenuItemController.java      (POST, PUT, DELETE)
+│   │   │   ├── MenuItemVariantController.java (PUT, DELETE)
+│   │   │   ├── UserController.java          (POST, GET, PUT, DELETE)
+│   │   │   └── AddressController.java       (POST)
+│   │   ├── service/
+│   │   │   ├── RestaurantService.java
+│   │   │   ├── MenuItemService.java
+│   │   │   ├── MenuItemVariantService.java
+│   │   │   ├── UserService.java
+│   │   │   └── AddressService.java
+│   │   ├── repository/
+│   │   │   ├── RestaurantRepository.java    (incl. native GPS query)
+│   │   │   ├── MenuItemRepository.java
+│   │   │   ├── MenuItemVariantRepository.java
+│   │   │   ├── UserRepository.java
+│   │   │   └── AddressRepository.java
+│   │   ├── entity/
+│   │   │   ├── Base.java           (MappedSuperclass: id, createdAt)
+│   │   │   ├── Restaurant.java
+│   │   │   ├── MenuItem.java
+│   │   │   ├── MenuItemVariant.java
+│   │   │   ├── Address.java
+│   │   │   └── User.java
+│   │   ├── dto/
+│   │   │   ├── RestaurantRequestDTO.java
+│   │   │   ├── RestaurantResponseDTO.java
+│   │   │   ├── MenuItemRequestDTO.java
+│   │   │   ├── MenuItemResponseDTO.java
+│   │   │   ├── MenuItemVariantRequestDTO.java
+│   │   │   ├── MenuItemVariantResponseDTO.java
+│   │   │   ├── CombineMenuItemAndMenuItemVariantRequestDTO.java
+│   │   │   ├── UserRequestDTO.java
+│   │   │   ├── UserResponseDTO.java
+│   │   │   ├── AddressRequestDTO.java
+│   │   │   └── ErrorDTO.java
+│   │   ├── enums/
+│   │   │   └── MenuItemType.java   (VEG, NONVEG)
+│   │   ├── exception/
+│   │   │   ├── GlobalExceptionHandler.java
+│   │   │   ├── AlreadyExistException.java
+│   │   │   ├── ResourceNotFoundException.java
+│   │   │   └── InvalidRequestException.java
+│   │   └── ProjectApplication.java
+│   └── src/main/resources/
+│       └── application.properties
+├── frontend/
+│   ├── index.html        # 🛠️ Admin / Partner Panel
+│   ├── app_v2.js         # Admin Panel – all API calls, validations, modals
+│   ├── consumer.html     # 🍔 Customer Ordering Storefront
+│   ├── consumer.js       # Customer Logic – search, filters, GPS, menu overlay
+│   ├── style.css         # Admin Panel Styles
+│   ├── logo.png          # Zomato logo asset
+│   ├── food-banner.png   # Hero banner image
+│   └── test_apis.js      # Node.js full API test suite (27/28 tests pass)
+├── README.md
+└── .gitignore
 ```
 
 ---
 
-## ðŸ¤ Contributing
+## 🤝 Contributing
 
 Contributions are welcome! Feel free to open issues or submit pull requests.
 
@@ -326,11 +330,9 @@ Contributions are welcome! Feel free to open issues or submit pull requests.
 ---
 
 <div align="center">
-  <p>Made with â¤ï¸ as part of an <strong>Advanced Java</strong> learning journey.</p>
+  <p>Made with ❤️ as part of an <strong>Advanced Java</strong> learning journey.</p>
   <p>
     <img src="https://img.shields.io/github/last-commit/Shivansh1146/ZomatoProject?style=flat-square" />
     <img src="https://img.shields.io/github/languages/top/Shivansh1146/ZomatoProject?style=flat-square" />
   </p>
 </div>
-
-
