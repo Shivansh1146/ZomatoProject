@@ -110,7 +110,9 @@ User ───────────────── standalone entity
 | `POST` | `/restaurant`    | Register a restaurant | Req: `RestaurantRequestDTO`  |
 | `GET`  | `/restaurant`    | Get all restaurants   | Res: `List<RestaurantResponseDTO>` |
 | `GET`  | `/restaurant/{id}`| Get specific restaurant| Res: `RestaurantResponseDTO` |
+| `PUT`  | `/restaurant/{id}`| Update restaurant     | Req: `RestaurantRequestDTO` |
 | `DELETE`| `/restaurant/{id}`| Delete a restaurant   | Res: `String`              |
+| `GET`  | `/restaurant/getRestaurantToUser` | Get nearby restaurants by GPS | Query: `userLon`, `userLat` |
 
 ### 🍕 Menu Item
 
@@ -125,9 +127,9 @@ User ───────────────── standalone entity
 | Method | Endpoint                | Description               | Body / Response                                  |
 |--------|-------------------------|---------------------------|--------------------------------------------------|
 | `PUT`  | `/menuItemVariant/{id}` | Update a menu item variant| Req: `CombineMenuItemAndMenuItemVariantRequestDTO` |
-| `DELETE`| `/menuItemVariant/{id}`| Delete a menu item variant| Res: `String`                                    |
+| `DELETE`| `/menuItemVariant/{id}`| Delete a menu item variant| Res: `String` (Guards last remaining variant)    |
 
-### 👤 User
+### 👤 User & Address Management
 
 | Method | Endpoint         | Description           | Body / Response          |
 |--------|------------------|-----------------------|--------------------------|
@@ -135,9 +137,10 @@ User ───────────────── standalone entity
 | `GET`  | `/user`          | Get all users         | Res: `List<UserResponseDTO>` |
 | `GET`  | `/user/{id}`     | Get user by ID        | Res: `UserResponseDTO`   |
 | `PUT`  | `/user/{id}`     | Update user details   | Req: `UserRequestDTO`    |
-| `DELETE`| `/user/{id}`     | Delete a user         | Res: `String`              |
+| `DELETE`| `/user/{id}`     | Delete a user         | Res: `String`            |
+| `POST` | `/address/{userId}` | Add delivery address to user | Req: `AddressRequestDTO` |
 
-> 💡 `POST` and `PUT` endpoints return `HTTP 201 Created` on success. `GET` and `DELETE` return `HTTP 200 OK`.
+> 💡 `POST` and `PUT` endpoints return `HTTP 201 Created` on success. `GET` and `DELETE` return `HTTP 200 OK`. Full input validation is backed by Hibernate Validator and managed through custom Exception Handlers.
 
 ---
 
@@ -248,36 +251,66 @@ With both the backend and frontend servers running, open your browser and naviga
 
 ```
 ZomatoProject/
-└── Project/
-    ├── src/
-    │   └── main/
-    │       ├── java/Zomato/Project/
-    │       │   ├── controller/
-    │       │   │   ├── RestaurantController.java
-    │       │   │   ├── MenuItemController.java
-    │       │   │   ├── MenuItemVariantController.java
-    │       │   │   └── UserController.java
-    │       │   ├── service/
-    │       │   ├── repository/
-    │       │   ├── entity/
-    │       │   │   ├── Base.java
-    │       │   │   ├── Restaurant.java
-    │       │   │   ├── MenuItem.java
-    │       │   │   ├── MenuItemVariant.java
-    │       │   │   ├── Address.java
-    │       │   │   └── User.java
-    │       │   ├── dto/
-    │       │   ├── enums/
-    │       │   └── ProjectApplication.java
-    │       └── resources/
-    │           └── application.properties
-    └── pom.xml
-frontend/
-├── index.html      # Admin Panel HTML (includes styling)
-├── app_v2.js       # Admin Panel Logic & API integration
-├── consumer.html   # Real-world Customer App UI
-├── consumer.js     # Customer App Logic & Image mapping
-└── test_apis.js    # Node.js API test suite
+├── Project/                      # Spring Boot Backend
+│   ├── src/main/java/Zomato/Project/
+│   │   ├── controller/
+│   │   │   ├── RestaurantController.java    (POST, GET, PUT, DELETE + GPS nearby)
+│   │   │   ├── MenuItemController.java      (POST, PUT, DELETE)
+│   │   │   ├── MenuItemVariantController.java (PUT, DELETE)
+│   │   │   ├── UserController.java          (POST, GET, PUT, DELETE)
+│   │   │   └── AddressController.java       (POST)
+│   │   ├── service/
+│   │   │   ├── RestaurantService.java
+│   │   │   ├── MenuItemService.java
+│   │   │   ├── MenuItemVariantService.java
+│   │   │   ├── UserService.java
+│   │   │   └── AddressService.java
+│   │   ├── repository/
+│   │   │   ├── RestaurantRepository.java    (incl. native GPS query)
+│   │   │   ├── MenuItemRepository.java
+│   │   │   ├── MenuItemVariantRepository.java
+│   │   │   ├── UserRepository.java
+│   │   │   └── AddressRepository.java
+│   │   ├── entity/
+│   │   │   ├── Base.java           (MappedSuperclass: id, createdAt)
+│   │   │   ├── Restaurant.java
+│   │   │   ├── MenuItem.java
+│   │   │   ├── MenuItemVariant.java
+│   │   │   ├── Address.java
+│   │   │   └── User.java
+│   │   ├── dto/
+│   │   │   ├── RestaurantRequestDTO.java
+│   │   │   ├── RestaurantResponseDTO.java
+│   │   │   ├── MenuItemRequestDTO.java
+│   │   │   ├── MenuItemResponseDTO.java
+│   │   │   ├── MenuItemVariantRequestDTO.java
+│   │   │   ├── MenuItemVariantResponseDTO.java
+│   │   │   ├── CombineMenuItemAndMenuItemVariantRequestDTO.java
+│   │   │   ├── UserRequestDTO.java
+│   │   │   ├── UserResponseDTO.java
+│   │   │   ├── AddressRequestDTO.java
+│   │   │   └── ErrorDTO.java
+│   │   ├── enums/
+│   │   │   └── MenuItemType.java   (VEG, NONVEG)
+│   │   ├── exception/
+│   │   │   ├── GlobalExceptionHandler.java
+│   │   │   ├── AlreadyExistException.java
+│   │   │   ├── ResourceNotFoundException.java
+│   │   │   └── InvalidRequestException.java
+│   │   └── ProjectApplication.java
+│   └── src/main/resources/
+│       └── application.properties
+├── frontend/
+│   ├── index.html        # 🛠️ Admin / Partner Panel
+│   ├── app_v2.js         # Admin Panel – all API calls, validations, modals
+│   ├── consumer.html     # 🍔 Customer Ordering Storefront
+│   ├── consumer.js       # Customer Logic – search, filters, GPS, menu overlay
+│   ├── style.css         # Admin Panel Styles
+│   ├── logo.png          # Zomato logo asset
+│   ├── food-banner.png   # Hero banner image
+│   └── test_apis.js      # Node.js full API test suite (27/28 tests pass)
+├── README.md
+└── .gitignore
 ```
 
 ---

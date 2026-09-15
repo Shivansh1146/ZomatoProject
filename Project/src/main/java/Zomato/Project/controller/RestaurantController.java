@@ -55,5 +55,9 @@ public class RestaurantController {
         }
         return ResponseEntity.status(404).body(response);
     }
+    @GetMapping("/getRestaurantToUser")
+    public ResponseEntity<List<RestaurantResponseDTO>> getRestaurantToUser(@RequestParam Double userLon,@RequestParam Double userLat){
+        return ResponseEntity.ok(restaurantService.getRestaurantToUser(userLon,userLat));
+    }
 }
 

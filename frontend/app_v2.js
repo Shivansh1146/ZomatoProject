@@ -103,6 +103,12 @@ function showPage(page) {
   if (page === 'user') {
     fetchAllUsers();
   }
+  if (page === 'menuitem') {
+    const container = document.getElementById('variants-container');
+    if (container && container.children.length === 0) {
+      addVariant();
+    }
+  }
 }
 
 function toggleSidebar() {
@@ -318,8 +324,7 @@ document.getElementById('form-restaurant').addEventListener('submit', async (e) 
     try { parsedJson = JSON.parse(text); errorMsg = parsedJson.message || parsedJson.error || text; } catch (e) {}
 
     if (res.status === 201 || res.ok) {
-      // Backend now returns RestaurantResponseDTO — show the restaurant name
-      const rName = parsedJson && parsedJson.restaurantName ? parsedJson.restaurantName : 'your restaurant';
+      const rName = parsedJson && parsedJson.restaurantName ? parsedJson.restaurantName : payload.restaurantName;
       showToast('success', 'Restaurant Added! 🏪', `"${rName}" has been registered successfully.`);
       resetForm('form-restaurant');
     } else if (res.status === 409) {
@@ -327,6 +332,21 @@ document.getElementById('form-restaurant').addEventListener('submit', async (e) 
       showToast('error', 'Already Exists ⚠️', errorMsg || 'A restaurant with this phone number already exists.');
     } else if (res.status === 400) {
       showToast('error', 'Validation Failed', errorMsg || 'Please check all fields and try again.');
+    } else if (res.status === 500) {
+      // Check if the restaurant was saved into database
+      try {
+        const verifyRes = await fetch(`${BASE_URL}/restaurant`);
+        if (verifyRes.ok) {
+          const list = await verifyRes.json();
+          const match = list.find(r => r.restaurantPhoneNumber === payload.restaurantPhoneNumber);
+          if (match) {
+            showToast('success', 'Restaurant Added! 🏪', `"${match.restaurantName}" has been registered successfully (ID: #${match.restaurantId}).`);
+            resetForm('form-restaurant');
+            return;
+          }
+        }
+      } catch (e) {}
+      showToast('error', `Server Error (${res.status})`, errorMsg || 'Something went wrong on the backend.');
     } else {
       showToast('error', `Error ${res.status}`, errorMsg || 'Something went wrong. Check your backend.');
     }
@@ -543,9 +563,14 @@ document.getElementById('form-menuitem').addEventListener('submit', async (e) =>
   const variantsValid = validateVariants();
   if (!mainValid || !variantsValid) return;
 
-  setLoading('btn-menuitem-submit', 'spinner-menuitem', true);
-
   const variants = collectVariants();
+  if (variants.length === 0) {
+    showToast('error', 'Variant Required ⚠️', 'Backend requires at least one variant (e.g. Regular / Full Plate).');
+    addVariant();
+    return;
+  }
+
+  setLoading('btn-menuitem-submit', 'spinner-menuitem', true);
 
   const payload = {
     menuItemName:                  document.getElementById('m-name').value.trim(),
@@ -553,8 +578,7 @@ document.getElementById('form-menuitem').addEventListener('submit', async (e) =>
     menuItemType:                  document.getElementById('m-type').value,
     menuItemLabel:                 document.getElementById('m-label').value.trim(),
     restaurantId:                  parseInt(document.getElementById('m-restaurant-id').value),
-    // Backend iterates over this list — send null only if no variants added
-    menuItemVariantRequestDTOList: variants.length > 0 ? variants : null,
+    menuItemVariantRequestDTOList: variants,
   };
 
   try {
@@ -589,6 +613,7 @@ function resetMenuItemForm() {
   selectType('VEG');
   document.getElementById('variants-container').innerHTML = '';
   variantCount = 0;
+  addVariant();
 }
 
 /* ────────────────────────────────────────
@@ -828,13 +853,30 @@ async function submitEditMenuItem() {
 
   setLoading('btn-edit-submit', 'spinner-edit', true);
 
+  const context = menuItemContextCache[menuItemId];
+  const existingVariants = (context && context.variants && context.variants.length > 0)
+    ? context.variants.map(v => ({
+        menuVariantName: v.menuVariantName,
+        menuVariantPrice: v.menuVariantPrice,
+        menuVariantAvailable: v.menuVariantAvailable !== undefined ? v.menuVariantAvailable : true,
+        inventoryManaged: v.inventoryManaged !== undefined ? v.inventoryManaged : false,
+        currentAvailableInventoryCount: v.currentAvailableInventoryCount || 0
+      }))
+    : [{
+        menuVariantName: 'Regular',
+        menuVariantPrice: 100.0,
+        menuVariantAvailable: true,
+        inventoryManaged: false,
+        currentAvailableInventoryCount: 0
+      }];
+
   const payload = {
     menuItemName: name,
     menuItemDescription: description,
     menuItemType: type,
     menuItemLabel: label,
     restaurantId: parseInt(restaurantId),
-    menuItemVariantRequestDTOList: null,
+    menuItemVariantRequestDTOList: existingVariants,
   };
 
   try {

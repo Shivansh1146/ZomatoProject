@@ -50,6 +50,12 @@
         </span>
         <span>Manage Users</span>
       </button>
+      <a class="nav-item" href="consumer.html" style="text-decoration:none; margin-top:12px; border-top:1px solid var(--border); padding-top:12px; color:var(--brand); font-weight:600;">
+        <span class="nav-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+        </span>
+        <span>Customer View ↗</span>
+      </a>
     </nav>
 
     <div class="sidebar-footer">
@@ -463,7 +469,7 @@
                     Add Variant
                   </button>
                 </div>
-                <p class="variants-hint">Variants are optional — but if added, Name and Price (₹) are required per variant.</p>
+                <p class="variants-hint">At least 1 variant is required (e.g. Regular, Half, Full) — Name and Price (&gt; 0) are required.</p>
                 <div id="variants-container"></div>
 
                 <div class="form-actions">
@@ -742,7 +748,6 @@
       </div>
     </div>
   </div>
-  <script src="app_v2.js?v=4"></script>
 
   <!-- ── ADD ADDRESS MODAL ── -->
   <div id="add-address-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:1000; align-items:center; justify-content:center; padding:16px;">
@@ -808,5 +813,6 @@
     </div>
   </div>
 
+  <script src="app_v2.js"></script>
 </body>
 </html>

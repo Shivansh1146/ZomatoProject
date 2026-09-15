@@ -74,22 +74,37 @@ let activeFilter = 'all';
 function setFilter(filter, el) {
   activeFilter = filter;
   document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
-  el.classList.add('active');
-  // Re-run the current search with the new filter
-  const term = searchInput.value.toLowerCase();
+  if (el) el.classList.add('active');
+  const term = (searchInput ? searchInput.value : '').toLowerCase();
   applyFilter(term);
 }
 
-searchInput.addEventListener('input', (e) => {
-  applyFilter(e.target.value.toLowerCase());
-});
+if (searchInput) {
+  searchInput.addEventListener('input', (e) => {
+    applyFilter(e.target.value.toLowerCase());
+  });
+}
 
 function applyFilter(term) {
-  let filtered = allRestaurants.filter(r =>
-    r.restaurantName.toLowerCase().includes(term) ||
-    (r.state && r.state.toLowerCase().includes(term)) ||
-    (r.streetLine1 && r.streetLine1.toLowerCase().includes(term))
-  );
+  let filtered = allRestaurants.filter(r => {
+    const nameMatch = r.restaurantName && r.restaurantName.toLowerCase().includes(term);
+    const stateMatch = r.state && r.state.toLowerCase().includes(term);
+    const streetMatch = r.streetLine1 && r.streetLine1.toLowerCase().includes(term);
+    const dishMatch = r.menuItemResponseDTOList && r.menuItemResponseDTOList.some(item =>
+      (item.menuItemName && item.menuItemName.toLowerCase().includes(term)) ||
+      (item.menuItemDescription && item.menuItemDescription.toLowerCase().includes(term))
+    );
+    const matchesSearch = !term || nameMatch || stateMatch || streetMatch || dishMatch;
+    if (!matchesSearch) return false;
+
+    if (activeFilter === 'veg') {
+      return r.menuItemResponseDTOList && r.menuItemResponseDTOList.some(i => i.menuItemType === 'VEG');
+    }
+    if (activeFilter === 'nonveg') {
+      return r.menuItemResponseDTOList && r.menuItemResponseDTOList.some(i => i.menuItemType === 'NONVEG');
+    }
+    return true;
+  });
   renderRestaurants(filtered);
 }
 
@@ -99,11 +114,50 @@ async function fetchRestaurants() {
     if (!res.ok) throw new Error('Backend unreachable');
     const data = await res.json();
     allRestaurants = data || [];
-    loading.style.display = 'none';
-    document.getElementById('section-title').style.display = 'flex';
-    renderRestaurants(allRestaurants);
+    if (loading) loading.style.display = 'none';
+    const st = document.getElementById('section-title');
+    if (st) st.style.display = 'flex';
+    applyFilter(searchInput ? searchInput.value.toLowerCase() : '');
   } catch (err) {
-    loading.innerHTML = `<span style="color:#E23744;">⚠ Could not reach backend at ${BASE_URL}. Is the Spring Boot app running?</span>`;
+    if (loading) loading.innerHTML = `<span style="color:#E23744;">⚠ Could not reach backend at ${BASE_URL}. Is the Spring Boot app running on port 9090?</span>`;
+  }
+}
+
+async function fetchNearbyRestaurants(el) {
+  document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+  if (el) el.classList.add('active');
+
+  const getPosition = () => new Promise((resolve) => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        pos => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+        () => resolve({ lat: 28.6139, lng: 77.2090 }) // Default to Delhi coordinates
+      );
+    } else {
+      resolve({ lat: 28.6139, lng: 77.2090 });
+    }
+  });
+
+  if (loading) {
+    loading.style.display = 'block';
+    loading.textContent = '📍 Finding restaurants near your location…';
+  }
+
+  const coords = await getPosition();
+  try {
+    const res = await fetch(`${BASE_URL}/restaurant/getRestaurantToUser?userLon=${coords.lng}&userLat=${coords.lat}`);
+    if (res.ok) {
+      const data = await res.json();
+      allRestaurants = data || [];
+      if (loading) loading.style.display = 'none';
+      const st = document.getElementById('section-title');
+      if (st) st.style.display = 'flex';
+      renderRestaurants(allRestaurants);
+    } else {
+      await fetchRestaurants();
+    }
+  } catch {
+    await fetchRestaurants();
   }
 }
 

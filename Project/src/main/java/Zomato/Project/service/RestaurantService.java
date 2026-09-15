@@ -167,4 +167,15 @@ public class RestaurantService {
         restaurantRepository.saveAndFlush(existingRestaurant);
         return "Successful Restaurant is updated";
     }
+
+    public List<RestaurantResponseDTO> getRestaurantToUser(Double userLon, Double userLat) {
+        List<Restaurant> restaurantList = restaurantRepository.findNearByRestaurant(userLon, userLat);
+
+        List<RestaurantResponseDTO> restaurantResponseDTOList = new ArrayList<>();
+        for (Restaurant restaurant : restaurantList) {
+            RestaurantResponseDTO restaurantResponseDTO = convertRestaurantToRestaurantResponseDTO(restaurant);
+            restaurantResponseDTOList.add(restaurantResponseDTO);
+        }
+        return restaurantResponseDTOList;
+    }
 }
