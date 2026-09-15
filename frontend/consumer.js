@@ -131,7 +131,8 @@ async function fetchNearbyRestaurants(el) {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         pos => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
-        () => resolve({ lat: 28.6139, lng: 77.2090 }) // Default to Delhi coordinates
+        () => resolve({ lat: 28.6139, lng: 77.2090 }), // Default to Delhi coordinates
+        { timeout: 5000 }
       );
     } else {
       resolve({ lat: 28.6139, lng: 77.2090 });
@@ -144,21 +145,47 @@ async function fetchNearbyRestaurants(el) {
   }
 
   const coords = await getPosition();
+  let nearbyData = null;
+
   try {
     const res = await fetch(`${BASE_URL}/restaurant/getRestaurantToUser?userLon=${coords.lng}&userLat=${coords.lat}`);
     if (res.ok) {
       const data = await res.json();
-      allRestaurants = data || [];
-      if (loading) loading.style.display = 'none';
-      const st = document.getElementById('section-title');
-      if (st) st.style.display = 'flex';
-      renderRestaurants(allRestaurants);
-    } else {
-      await fetchRestaurants();
+      if (Array.isArray(data) && data.length > 0) {
+        nearbyData = data;
+      }
     }
-  } catch {
-    await fetchRestaurants();
+  } catch (e) {
+    console.warn('Backend getRestaurantToUser error or unreachable:', e);
   }
+
+  // If spatial query yielded results, display them!
+  // Otherwise, load all restaurants and highlight them as nearest available
+  if (nearbyData && nearbyData.length > 0) {
+    allRestaurants = nearbyData;
+  } else {
+    // If not yet loaded or empty, fetch standard list
+    if (!allRestaurants || allRestaurants.length === 0) {
+      try {
+        const resAll = await fetch(`${BASE_URL}/restaurant`);
+        if (resAll.ok) {
+          allRestaurants = await resAll.json() || [];
+        }
+      } catch (err) {
+        console.error('Fetch all fallback error:', err);
+      }
+    }
+  }
+
+  if (loading) loading.style.display = 'none';
+  const st = document.getElementById('section-title');
+  if (st) st.style.display = 'flex';
+
+  const term = (searchInput ? searchInput.value : '').toLowerCase();
+  applyFilter(term);
+
+  // Show a helpful toast indicating location detected
+  showToast('📍 Showing closest restaurants to your area');
 }
 
 function renderRestaurants(restaurants) {
